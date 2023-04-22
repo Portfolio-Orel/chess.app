@@ -1,20 +1,34 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from "react-native";
+
+import { Provider } from "react-redux";
+import { store } from "./src/redux/store";
+
+import { Provider as PaperProvider } from "react-native-paper";
+
+import Register from "./src/screens/Register";
+import { configureAmplify } from "./amplify";
 
 export default function App() {
+  configureAmplify();
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <Provider store={store}>
+      <PaperProvider>
+        <View style={styles.container}>
+          <Register />
+        </View>
+      </PaperProvider>
+    </Provider>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+    height: "100%",
+    width: "100%",
   },
 });
