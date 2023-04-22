@@ -33,9 +33,18 @@ const authReducer = (state = initialState, action) => {
     case REGISTER_REQUEST:
       return { ...state, isLoading: true, error: null };
     case REGISTER_SUCCESS:
-      return { ...state, isLoading: false, user: action.user };
+      return {
+        ...state,
+        isLoading: false,
+        user: { ...action.user, isRegistered: true },
+      };
     case REGISTER_FAILURE:
-      return { ...state, isLoading: false, error: action.error };
+      return {
+        ...state,
+        isLoading: false,
+        error: action.error,
+        user: { ...state.user, isRegistered: false },
+      };
     case CONFIRM_SIGN_UP_REQUEST:
       return { ...state, isLoading: true, error: null };
     case CONFIRM_SIGN_UP_SUCCESS:

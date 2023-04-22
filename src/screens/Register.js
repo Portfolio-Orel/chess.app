@@ -5,6 +5,7 @@ import { Formik } from "formik";
 import FirstStageRegsiter from "../containers/FirstStageRegister";
 import { useSelector } from "react-redux";
 import { useState } from "react";
+import { useEffect } from "react";
 
 export function Register() {
   const authState = useSelector((state) => state.auth);
@@ -15,17 +16,35 @@ export function Register() {
     authState.isConfirmed ? true : false
   );
 
+  useEffect(() => {
+    if (authState?.user) {
+      setIsRegistered(true);
+    } else {
+      setIsRegistered(false);
+    }
+    if (authState?.user?.isConfirmed) {
+      setIsConfirmed(true);
+    } else {
+      setIsConfirmed(false);
+    }
+  }, [authState]);
+
   return (
     <View style={styles.container}>
-      <Text>Some login details</Text>
-      <Formik
-        initialValues={{ email: "" }}
-        onSubmit={(values) => console.log(values)}
-      >
-        {({ handleChange, handleBlur, handleSubmit, values }) => (
-          <FirstStageRegsiter />
-        )}
-      </Formik>
+      {isConfirmed ? (
+        <>
+          <Text>Confirmed</Text>
+        </>
+      ) : (
+        <Formik
+          initialValues={{ email: "" }}
+          onSubmit={(values) => console.log(values)}
+        >
+          {({ handleChange, handleBlur, handleSubmit, values }) => (
+            <FirstStageRegsiter />
+          )}
+        </Formik>
+      )}
     </View>
   );
 }

@@ -43,6 +43,7 @@ export default function FirstStageRegsiter({ isUserRegistered = false }) {
         />
       ) : (
         <View style={styles.container}>
+          <Text>Some login details</Text>
           <Formik
             validationSchema={registerSchema}
             initialValues={{
