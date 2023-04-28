@@ -8,6 +8,9 @@ import { Provider as PaperProvider } from "react-native-paper";
 import Register from "./src/screens/Register";
 import { configureAmplify } from "./amplify";
 
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+const Stack = createNativeStackNavigator();
+
 export default function App() {
   configureAmplify();
 

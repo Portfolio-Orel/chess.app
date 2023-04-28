@@ -43,7 +43,7 @@ export default function FirstStageRegsiter({ isUserRegistered = false }) {
         />
       ) : (
         <View style={styles.container}>
-          <Text>Some login details</Text>
+          <Text style={styles.title}>פרטי התחברות</Text>
           <Formik
             validationSchema={registerSchema}
             initialValues={{
@@ -97,14 +97,16 @@ export default function FirstStageRegsiter({ isUserRegistered = false }) {
                   </View>
                   <Text style={{ color: "#ba221b" }}>{authState?.error}</Text>
                 </View>
-                <Button
-                  mode="contained"
-                  onPress={handleSubmit}
-                  loading={authState.isLoading}
-                  style={styles.buttonContainer}
-                >
-                  <Text style={styles.buttonText}>המשך</Text>
-                </Button>
+                <View style={styles.buttonContainer}>
+                  <Button
+                    mode="contained"
+                    onPress={handleSubmit}
+                    loading={authState.isLoading}
+                    style={styles.button}
+                  >
+                    <Text style={styles.buttonText}>המשך</Text>
+                  </Button>
+                </View>
               </View>
             )}
           </Formik>
@@ -139,6 +141,12 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   buttonContainer: {
+    width: "100%",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  button: {
     width: 140,
     height: 50,
     display: "flex",
@@ -153,5 +161,12 @@ const styles = StyleSheet.create({
     height: "100%",
     justifyContent: "space-between",
     alignItems: "flex-end",
+  },
+  title: {
+    width: "100%",
+    textAlign: "center",
+    fontSize: 30,
+    fontWeight: "semibold",
+    marginBottom: 20,
   },
 });

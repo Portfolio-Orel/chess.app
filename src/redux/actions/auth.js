@@ -37,16 +37,16 @@ const loginFailure = (error) => ({
   error,
 });
 
-const registerRequest = () => ({
+const signUpRequest = () => ({
   type: REGISTER_REQUEST,
 });
 
-const registerSuccess = (user) => ({
+const signUpSuccess = (user) => ({
   type: REGISTER_SUCCESS,
   user,
 });
 
-const registerFailure = (error) => ({
+const signUpFailure = (error) => ({
   type: REGISTER_FAILURE,
   error,
 });
@@ -129,7 +129,7 @@ export const logoutUser = () => (dispatch) => {
 
 export const register = (email, phone_number) => async (dispatch) => {
   const formattedPhoneNumber = formatPhoneNumber(phone_number);
-  dispatch(registerRequest());
+  dispatch(signUpRequest());
   try {
     const result = await Auth.signUp({
       username: formattedPhoneNumber,
@@ -146,14 +146,14 @@ export const register = (email, phone_number) => async (dispatch) => {
       email,
       phoneNumber: formatPhoneNumber(phone_number),
     };
-    dispatch(registerSuccess(user));
+    dispatch(signUpSuccess(user));
   } catch (error) {
     console.log(error);
     switch (error) {
       case "UsernameExistsException":
-        dispatch(registerFailure("User already exists"));
+        dispatch(signUpFailure("User already exists"));
       default:
-        dispatch(registerFailure(error.message ?? "Error registering"));
+        dispatch(signUpFailure(error.message ?? "Error registering"));
     }
   }
 };
