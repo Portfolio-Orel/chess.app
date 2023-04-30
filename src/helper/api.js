@@ -1,4 +1,5 @@
 import axios from "axios";
+import StubData from "../constants/stub";
 
 const api = axios.create({
   baseURL: "http://localhost:4000",
@@ -11,8 +12,9 @@ const init = (userId) => {
 
 const fetchEvents = async () => {
   try {
-    const response = await api.get("/events");
-    const events = response.data;
+    const events = StubData.events;
+    // const response = await api.get("/events");
+    // const events = response.data;
     return events;
   } catch (error) {
     throw new error();
@@ -29,8 +31,9 @@ const registerToEvent = async (eventId) => {
 
 const fetchGameFormats = async () => {
   try {
-    const response = await api.get("/gameFormats");
-    const gameFormats = response.data;
+    const gameFormats = StubData.gameFormats;
+    // const response = await api.get("/gameFormats");
+    // const gameFormats = response.data;
     return gameFormats;
   } catch (error) {
     throw new error();
@@ -39,8 +42,9 @@ const fetchGameFormats = async () => {
 
 const fetchGames = async () => {
   try {
-    const response = await api.get("/games");
-    const games = response.data;
+    const games = StubData.games;
+    // const response = await api.get("/games");
+    // const games = response.data;
     return games;
   } catch (error) {
     throw new error();

@@ -1,10 +1,22 @@
 import React, { useState } from "react";
-import { View, Text, Image, ActivityIndicator, StyleSheet } from "react-native";
-import { Button, TextInput } from "react-native-paper";
+
 import * as Yup from "yup";
 import { Formik } from "formik";
 
-const LoginScreen = () => {
+import { View, Text, Image, ActivityIndicator, StyleSheet } from "react-native";
+import { Button, TextInput } from "react-native-paper";
+
+import { useNavigation } from "@react-navigation/native";
+import { useDispatch } from "react-redux";
+
+import { login } from "../redux/actions/auth";
+
+import screens from "../constants/screens";
+
+const Login = () => {
+  const navigation = useNavigation();
+  const dispatch = useDispatch();
+
   const [phoneNumber, setPhoneNumber] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingLogin, setIsLoadingLogin] = useState(false);
@@ -24,7 +36,9 @@ const LoginScreen = () => {
   //   // perform login action
   // };
 
-  const handleSignUp = () => {};
+  const handleSignUp = () => {
+    navigation.navigate(screens.register.route);
+  };
 
   return (
     <View style={styles.container}>
@@ -34,16 +48,16 @@ const LoginScreen = () => {
         </View>
       ) : (
         <Formik
-          validationSchema={phoneSchema}
-          initialValues={{ phoneNumber: "" }}
-          onSubmit={(values) => console.log(values)}
+          validationSchema={emailSchema}
+          initialValues={{ email: "" }}
+          onSubmit={(values) => dispatch(login(values.email))}
         >
           {({ handleChange, handleBlur, handleSubmit, values }) => (
             <View style={styles.contentContainer}>
               <View style={styles.inputContainer}>
                 <TextInput
-                  name="phoneNumber"
-                  label="מספר טלפון"
+                  name="email"
+                  label="אימייל"
                   theme={{
                     colors: {
                       primary: "#000", // color of the label and the outline when focused
@@ -51,10 +65,10 @@ const LoginScreen = () => {
                     },
                   }}
                   placeholder=""
-                  value={values.phoneNumber}
-                  onChangeText={handleChange("phoneNumber")}
-                  onBlur={handleBlur("phoneNumber")}
-                  keyboardType="phone-pad"
+                  value={values.email}
+                  onChangeText={handleChange("email")}
+                  onBlur={handleBlur("email")}
+                  keyboardType="email-address"
                   style={styles.textInput}
                 />
               </View>
@@ -74,7 +88,7 @@ const LoginScreen = () => {
                     style={styles.signUpLink}
                     onPress={handleSignUp}
                   >
-                  הרשם
+                    הרשם
                   </Button>
                 </View>
                 <Button
@@ -152,6 +166,7 @@ const styles = StyleSheet.create({
   signUpLink: {
     fontSize: 14,
     fontWeight: "bold",
+    padding: 0,
   },
   bottomContainer: {
     flexDirection: "row",
@@ -184,4 +199,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LoginScreen;
+export default Login;

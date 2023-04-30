@@ -1,9 +1,14 @@
-import { Auth } from "aws-amplify";
+import { Auth, Hub } from "aws-amplify";
 import {
   generateStrongPassword,
   formatPhoneNumber,
 } from "../../utils/authUtils";
 import axios from "axios";
+
+export const LISTEN_TO_AUTH_STATE_CHANGE = "LISTEN_TO_AUTH_STATE_CHANGE";
+
+export const CHECK_AUTH_STATE_REQUEST = "CHECK_AUTH_STATE_REQUEST";
+export const CHECK_AUTH_STATE_DONE = "CHECK_AUTH_STATE_DONE";
 
 export const LOGIN_REQUEST = "LOGIN_REQUEST";
 export const LOGIN_SUCCESS = "LOGIN_SUCCESS";
@@ -22,6 +27,12 @@ export const REGISTER_USER_DETAILS_SUCCESS = "REGISTER_USER_DETAILS_SUCCESS";
 export const REGISTER_USER_DETAILS_FAILURE = "REGISTER_USER_DETAILS_FAILURE";
 
 export const LOGOUT = "LOGOUT";
+
+const buildUserName = (email) => {
+  const emailParts = email.split("@");
+  const username = emailParts.join("_");
+  return username;
+};
 
 const loginRequest = () => ({
   type: LOGIN_REQUEST,
@@ -115,10 +126,15 @@ export const isAuthenticated = () => async (dispatch) => {
     await setUser(dispatch);
   }
 };
-export const login = (username, password) => async (dispatch) => {
+export const login = (email) => async (dispatch) => {
   dispatch(loginRequest());
-  await Auth.signIn(username, password);
-  await setUser(dispatch);
+  try {
+    const user = await Auth.signIn(formatPhoneNumber("0543056286"));
+    // await setUser(dispatch);
+  } catch (error) {
+    console.log(error);
+    dispatch(loginFailure(error.message ?? "Error logging in"));
+  }
 };
 
 export const logoutUser = () => (dispatch) => {
@@ -131,12 +147,14 @@ export const register = (email, phone_number) => async (dispatch) => {
   const formattedPhoneNumber = formatPhoneNumber(phone_number);
   dispatch(signUpRequest());
   try {
+    debugger;
     const result = await Auth.signUp({
       username: formattedPhoneNumber,
       password: generateStrongPassword(),
       attributes: {
         email,
         phone_number: formattedPhoneNumber,
+        preferred_username: formattedPhoneNumber,
       },
       autoSignIn: { enabled: true },
     });
@@ -146,8 +164,11 @@ export const register = (email, phone_number) => async (dispatch) => {
       email,
       phoneNumber: formatPhoneNumber(phone_number),
     };
+    debugger;
     dispatch(signUpSuccess(user));
+    debugger;
   } catch (error) {
+    debugger;
     console.log(error);
     switch (error) {
       case "UsernameExistsException":
@@ -191,5 +212,20 @@ export const registerUserDetails = (user) => async (dispatch) => {
     dispatch(
       registerUserDetailsFailure(error.message ?? "Error registering user")
     );
+  }
+};
+
+export const checkAuthState = () => async (dispatch) => {
+  try {
+    dispatch({ type: CHECK_AUTH_STATE_REQUEST });
+    const session = await Auth.currentSession();
+    console.log(session);
+    if (session.isValid()) {
+      await setUser(dispatch);
+    }
+  } catch (error) {
+    console.log(error);
+  } finally {
+    dispatch({ type: CHECK_AUTH_STATE_DONE });
   }
 };

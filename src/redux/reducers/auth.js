@@ -1,4 +1,6 @@
 import {
+  CHECK_AUTH_STATE_REQUEST, 
+  CHECK_AUTH_STATE_DONE,
   LOGIN_REQUEST,
   LOGIN_SUCCESS,
   LOGIN_FAILURE,
@@ -22,6 +24,10 @@ const initialState = {
 
 const authReducer = (state = initialState, action) => {
   switch (action.type) {
+    case CHECK_AUTH_STATE_REQUEST:
+      return { ...state, isLoading: true, error: null };
+    case CHECK_AUTH_STATE_DONE:
+      return { ...state, isLoading: false, error: action.error };
     case LOGIN_REQUEST:
       return { ...state, isLoading: true, error: null };
     case LOGIN_SUCCESS:

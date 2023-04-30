@@ -1,15 +1,21 @@
-import { StyleSheet, View } from "react-native";
-
 import { Provider } from "react-redux";
 import { store } from "./src/redux/store";
 
 import { Provider as PaperProvider } from "react-native-paper";
 
-import Register from "./src/screens/Register";
 import { configureAmplify } from "./amplify";
 
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-const Stack = createNativeStackNavigator();
+// import * as Localization from 'expo-localization';
+// import i18n from 'i18n-js';
+import { I18nManager } from "react-native";
+
+import en from "./src/i18n/en.json";
+import he from "./src/i18n/he.json";
+
+import Main from "./src/screens/Main";
+
+I18nManager.allowRTL(true);
+I18nManager.forceRTL(true);
 
 export default function App() {
   configureAmplify();
@@ -17,21 +23,8 @@ export default function App() {
   return (
     <Provider store={store}>
       <PaperProvider>
-        <View style={styles.container}>
-          <Register />
-        </View>
+        <Main />
       </PaperProvider>
     </Provider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-    height: "100%",
-    width: "100%",
-  },
-});
