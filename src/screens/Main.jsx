@@ -18,7 +18,7 @@ const Stack = createNativeStackNavigator();
 
 export default function Main() {
   const dispatch = useDispatch();
-  const authState = useSelector((state) => state.auth);
+  const authState = useSelector((state) => state.authState);
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 

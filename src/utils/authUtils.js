@@ -1,10 +1,4 @@
 export const formatPhoneNumber = (phoneNumber) => {
-  // check if the phone number is valid and then replace the first 0 with +972
-  // if the phone number is not valid, return an empty string
-  // the phone number should be 10 digits long
-  // the phone number should start with 0
-  // the phone number should contain only digits
-
   const phoneRegex = /^0[0-9]{9}$/;
   const phoneRegexWithPlus = /^\+972[0-9]{9}$/;
   if (phoneRegex.test(phoneNumber)) {

@@ -105,13 +105,13 @@ const clearEvents = () => ({
 export const handleFetchEvents = () => async (dispatch) => {
   dispatch(fetchEventsRequest());
   try {
-    // const response = await axios.get("/api/events", {
+    // const response = await axios.get("/api/events", { 
     //   method: "GET",
     //   headers: {
     //     "Content-Type": "application/json",
     //   },
     // });
-    api.init("");
+    // api.init("");
     const events = await api.fetchEvents();
     dispatch(fetchEventsSuccess(events));
   } catch (error) {

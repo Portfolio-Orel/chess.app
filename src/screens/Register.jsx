@@ -8,7 +8,7 @@ import { useState } from "react";
 import { useEffect } from "react";
 
 export function Register() {
-  const authState = useSelector((state) => state.auth);
+  const authState = useSelector((state) => state.authState);
   const [isRegistered, setIsRegistered] = useState(
     authState.user ? true : false
   );

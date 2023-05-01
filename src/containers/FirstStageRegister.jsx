@@ -12,7 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function FirstStageRegsiter({ isUserRegistered = false }) {
   const dispatch = useDispatch();
-  const authState = useSelector((state) => state.auth);
+  const authState = useSelector((state) => state.authState);
   const [isRegistered, setIsRegistered] = useState(isUserRegistered);
 
   useEffect(() => {

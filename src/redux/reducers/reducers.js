@@ -1,17 +1,19 @@
+import { combineReducers } from "redux";
+
 import authReducer from "./auth";
 import eventsReducer from "./event";
+import eventsParticipantsReducer from "./eventsParticipants";
 import gameReducer from "./games";
 import gameFormatsReducer from "./gameFormats";
 import intervalsReducer from "./intervals";
 import snacbbarReducer from "./snackbar";
 
-import { combineReducers } from "redux";
-
 export default combineReducers({
-  auth: authReducer,
-  events: eventsReducer,
-  games: gameReducer,
-  gameFormats: gameFormatsReducer,
-  intervals: intervalsReducer,
-  snackbar: snacbbarReducer,
+  authState: authReducer,
+  eventsState: eventsReducer,
+  eventsParticipantsState: eventsParticipantsReducer,
+  gamesState: gameReducer,
+  gameFormatsState: gameFormatsReducer,
+  intervalsState: intervalsReducer,
+  snackbarState: snacbbarReducer,
 });
