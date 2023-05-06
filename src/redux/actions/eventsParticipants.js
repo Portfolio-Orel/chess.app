@@ -106,7 +106,7 @@ export const handleFetchEventsParticipants = (eventId) => async (dispatch) => {
 };
 
 export const handleAddEventParticipant =
-  (eventId, participant) => async (dispatch) => {
+  (eventId, user_id) => async (dispatch) => {
     dispatch(addEventParticipantRequest());
     try {
       const response = await axios.post(`/api/events/${eventId}/participants`, {
@@ -114,7 +114,7 @@ export const handleAddEventParticipant =
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(participant),
+        body: JSON.stringify(user_id),
       });
       const newEventParticipant = JSON.parse(response.data);
       dispatch(addEventParticipantSuccess(newEventParticipant));

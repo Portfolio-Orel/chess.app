@@ -1,5 +1,5 @@
 import axios from "axios";
-import StubData from "../../constants/stub";
+import * as api from "../../helper/api";
 
 export const FETCH_GAME_FORMATS_REQUEST = "FETCH_GAME_FORMATS_REQUEST";
 export const FETCH_GAME_FORMATS_SUCCESS = "FETCH_GAME_FORMATS_SUCCESS";
@@ -82,17 +82,9 @@ const clearGameFormats = () => ({
 });
 
 export const handleFetchGameFormats = () => async (dispatch) => {
-  // dispatch(fetchGameFormatsRequest());
+  dispatch(fetchGameFormatsRequest());
   try {
-    //   const response = await axios.get("/api/gameFormats", {
-    //     method: "GET",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //   });
-    //   const gameFormats = JSON.parse(response.data);
-    //   debugger;
-    const gameFormats = StubData.gameFormats;
+    const gameFormats = await api.fetchGameFormats();
     dispatch(fetchGameFormatsSuccess(gameFormats));
   } catch (error) {
     dispatch(fetchGameFormatsFailure(error.message));

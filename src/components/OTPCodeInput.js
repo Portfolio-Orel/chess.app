@@ -1,6 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, TextInput, StyleSheet } from "react-native";
-import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Button } from "react-native-paper";
 
@@ -9,21 +8,13 @@ const OTPCodeInput = ({
   isLoading = false,
   numInputs = 6,
 }) => {
-  const initialValues = [...Array(numInputs)].map(() => "");
+  const [values, setValues] = useState([...Array(numInputs)].map(() => ""));
   const validationSchema = Yup.array().of(Yup.string().required("Required"));
 
-  const { handleChange, handleSubmit, values, errors, setFieldValue } =
-    useFormik({
-      initialValues,
-      validationSchema,
-      onSubmit: (values) => {
-        onOTPCodeEntered(values.join(""));
-      },
-    });
-
   const handleCodeInput = (index, value) => {
-    const newValue = value[value.length - 1];
-    setFieldValue(`[${index}]`, newValue);
+    const newValues = [...values];
+    newValues[index] = value[value.length - 1];
+    setValues(newValues);
     if (index < numInputs - 1 || !value) {
       const nextInput = `input_${index + 1}`;
       if (value) {
@@ -37,6 +28,19 @@ const OTPCodeInput = ({
     } else if (value) {
       handleSubmit();
     }
+  };
+
+  const handleSubmit = () => {
+    validationSchema
+      .validate(values)
+      .then(() => {
+        console.log("onOTPCodeEntered: ", values.join(""));
+        onOTPCodeEntered(values.join(""));
+      })
+      .catch((errors) => {
+        // handle validation errors
+        console.log(errors);
+      });
   };
 
   return (
@@ -79,7 +83,7 @@ const OTPCodeInput = ({
       </View>
       <Button
         mode="contained"
-        onPress={handleSubmit}
+        onPress={() => handleSubmit()}
         loading={isLoading}
         style={{ marginTop: 10 }}
       >

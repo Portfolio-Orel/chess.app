@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 
-import Loading from "../components/Loading";
+import states from "../constants/states";
 import Login from "./Login";
 import Register from "./Register";
 
@@ -23,22 +23,21 @@ export default function Main() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
+    console.log("LOL");
     dispatch(checkAuthState());
   }, [dispatch]);
 
   useEffect(() => {
-    if (authState.user) {
+    if (authState.user?.state === states.authorized) {
       setIsLoggedIn(true);
     } else {
       setIsLoggedIn(false);
     }
   }, [authState]);
 
-  return authState.isLoading ? (
-    <Loading />
-  ) : (
+  return (
     <NavigationContainer>
-      {!isLoggedIn ? (
+      {isLoggedIn ? (
         <CustomNavigator>
           <Stack.Screen
             name={screens.content.route}
@@ -51,6 +50,9 @@ export default function Main() {
               },
             }}
           />
+        </CustomNavigator>
+      ) : (
+        <CustomNavigator>
           <Stack.Screen
             name={screens.login.route}
             component={Login}
@@ -62,20 +64,6 @@ export default function Main() {
               },
             }}
           />
-          <Stack.Screen
-            name={screens.register.route}
-            component={Register}
-            options={{
-              title: screens.register.title,
-              headerTitleAlign: "right",
-              headerTitleStyle: {
-                writingDirection: "rtl",
-              },
-            }}
-          />
-        </CustomNavigator>
-      ) : (
-        <CustomNavigator>
           <Stack.Screen
             name={screens.register.route}
             component={Register}

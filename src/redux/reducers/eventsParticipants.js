@@ -15,7 +15,7 @@ import {
 } from "../actions/eventsParticipants";
 
 const initialState = {
-  eventParticipants: [],
+  eventsParticipants: [],
   loading: false,
   error: null,
 };
@@ -39,7 +39,7 @@ const eventsParticipantsReducer = (state = initialState, action) => {
         ...state,
         loading: false,
         eventParticipants: [
-          ...state.eventParticipants,
+          ...state.eventsParticipants,
           action.payload.eventParticipant,
         ],
       };
@@ -47,7 +47,7 @@ const eventsParticipantsReducer = (state = initialState, action) => {
       return {
         ...state,
         loading: false,
-        eventParticipants: state.eventParticipants.map((eventParticipant) =>
+        eventParticipants: state.eventsParticipants.map((eventParticipant) =>
           eventParticipant.id === action.payload.eventParticipant.id
             ? action.payload.eventParticipant
             : eventParticipant
@@ -57,7 +57,7 @@ const eventsParticipantsReducer = (state = initialState, action) => {
       return {
         ...state,
         loading: false,
-        eventParticipants: state.eventParticipants.filter(
+        eventParticipants: state.eventsParticipants.filter(
           (eventParticipant) => eventParticipant.id !== action.payload.id
         ),
       };

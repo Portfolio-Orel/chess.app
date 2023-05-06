@@ -1,5 +1,5 @@
 import axios from "axios";
-import StubData from "../../constants/stub";
+import * as api from "../../helper/api";
 
 export const FETCH_GAMES_REQUEST = "FETCH_GAMES_REQUEST";
 export const FETCH_GAMES_SUCCESS = "FETCH_GAMES_SUCCESS";
@@ -84,14 +84,7 @@ export const clearGames = () => ({
 export const handleFetchGames = () => async (dispatch) => {
   dispatch(fetchGamesRequest());
   try {
-    // const response = await axios.get("/api/games", {
-    //   method: "GET",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    // });
-    // const games = JSON.parse(response.data);
-    const games = StubData.games;
+    const games = await api.fetchGames();
     dispatch(fetchGamesSuccess(games));
   } catch (error) {
     dispatch(fetchGamesFailure(error.message));

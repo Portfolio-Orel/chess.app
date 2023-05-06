@@ -1,11 +1,12 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import { Text } from "react-native-paper";
 import { Formik } from "formik";
 import FirstStageRegsiter from "../containers/FirstStageRegister";
 import { useSelector } from "react-redux";
 import { useState } from "react";
 import { useEffect } from "react";
+
+import states from "../constants/states";
 
 export function Register() {
   const authState = useSelector((state) => state.authState);
@@ -13,7 +14,7 @@ export function Register() {
     authState.user ? true : false
   );
   const [isConfirmed, setIsConfirmed] = useState(
-    authState.isConfirmed ? true : false
+    authState.state === states.authorized ? true : false
   );
 
   useEffect(() => {
@@ -22,7 +23,7 @@ export function Register() {
     } else {
       setIsRegistered(false);
     }
-    if (authState?.user?.isConfirmed) {
+    if (authState?.state === states.authorized) {
       setIsConfirmed(true);
     } else {
       setIsConfirmed(false);
@@ -31,11 +32,7 @@ export function Register() {
 
   return (
     <View style={styles.container}>
-      {isConfirmed ? (
-        <>
-          <Text>Confirmed</Text>
-        </>
-      ) : (
+      {
         <Formik
           initialValues={{ email: "" }}
           onSubmit={(values) => console.log(values)}
@@ -44,7 +41,7 @@ export function Register() {
             <FirstStageRegsiter />
           )}
         </Formik>
-      )}
+      }
     </View>
   );
 }

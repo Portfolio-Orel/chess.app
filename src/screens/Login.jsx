@@ -1,40 +1,35 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import * as Yup from "yup";
 import { Formik } from "formik";
 
-import { View, Text, Image, ActivityIndicator, StyleSheet } from "react-native";
+import { View, Text, Image, StyleSheet } from "react-native";
 import { Button, TextInput } from "react-native-paper";
 
-import { useNavigation } from "@react-navigation/native";
-import { useDispatch } from "react-redux";
+import OTPCodeInput from "../components/OTPCodeInput";
 
-import { login } from "../redux/actions/auth";
+import { useNavigation } from "@react-navigation/native";
+import { useDispatch, useSelector } from "react-redux";
+
+import { confirmSignIn, login } from "../redux/actions/auth";
 
 import screens from "../constants/screens";
+import states from "../constants/states";
 
 const Login = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
+  const authState = useSelector((state) => state.authState);
 
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [isLoadingLogin, setIsLoadingLogin] = useState(false);
   const [error, setError] = useState("");
 
-  // Phone schema numbers only, 10 min, 10 max required
-  const phoneSchema = Yup.string()
-    .matches(/^[0-9]+$/, "Must be only digits")
-    .required()
-    .min(10)
-    .max(10);
-
   const emailSchema = Yup.string().email().required().min(3).max(255);
 
-  // const handleLogin = () => {
-  //   setIsLoadingLogin(true);
-  //   // perform login action
-  // };
+  const handleLogin = (email) => {
+    setIsLoadingLogin(true);
+    dispatch(login(email));
+  };
 
   const handleSignUp = () => {
     navigation.navigate(screens.register.route);
@@ -42,72 +37,83 @@ const Login = () => {
 
   return (
     <View style={styles.container}>
-      {isLoading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" />
-        </View>
-      ) : (
-        <Formik
-          validationSchema={emailSchema}
-          initialValues={{ email: "" }}
-          onSubmit={(values) => dispatch(login(values.email))}
-        >
-          {({ handleChange, handleBlur, handleSubmit, values }) => (
-            <View style={styles.contentContainer}>
-              <View style={styles.inputContainer}>
-                <TextInput
-                  name="email"
-                  label="אימייל"
-                  theme={{
-                    colors: {
-                      primary: "#000", // color of the label and the outline when focused
-                      underlineColor: "transparent", // color of the underline when focused
-                    },
-                  }}
-                  placeholder=""
-                  value={values.email}
-                  onChangeText={handleChange("email")}
-                  onBlur={handleBlur("email")}
-                  keyboardType="email-address"
-                  style={styles.textInput}
-                />
-              </View>
-              <View style={styles.logoContainer}>
-                <Image
-                  source={require("../assets/images/logo_light.png")}
-                  style={styles.logo}
-                  resizeMode="contain"
-                />
-              </View>
-              <View style={styles.buttonAndSignUpContainer}>
-                <View style={styles.signUpContainer}>
-                  <Text style={styles.signUpText}>אין לך משתמש?</Text>
-                  <Button
-                    type="text"
-                    textColor="#000"
-                    style={styles.signUpLink}
-                    onPress={handleSignUp}
-                  >
-                    הרשם
-                  </Button>
-                </View>
+      <Formik
+        validationSchema={emailSchema}
+        initialValues={{ username: "", password: "" }}
+        onSubmit={(values) => handleLogin(values.username, values.password)}
+      >
+        {({ handleChange, handleBlur, handleSubmit, values }) => (
+          <View style={styles.contentContainer}>
+            <View style={styles.inputContainer}>
+              <TextInput
+                name="username"
+                label="אימייל"
+                theme={{
+                  colors: {
+                    primary: "#000", // color of the label and the outline when focused
+                    underlineColor: "transparent", // color of the underline when focused
+                  },
+                }}
+                placeholder=""
+                value={values.email}
+                onChangeText={handleChange("email")}
+                onBlur={handleBlur("email")}
+                keyboardType="email-address"
+                style={styles.textInput}
+              />
+              <TextInput
+                name="password"
+                label="סיסמה"
+                theme={{
+                  colors: {
+                    primary: "#000", // color of the label and the outline when focused
+                    underlineColor: "transparent", // color of the underline when focused
+                  },
+                }}
+                placeholder=""
+                value={values.password}
+                onChangeText={handleChange("password")}
+                onBlur={handleBlur("password")}
+                secureTextEntry
+                keyboardType="visible-password"
+                style={styles.textInput}
+              />
+            </View>
+            <View style={styles.logoContainer}>
+              <Image
+                source={require("../assets/images/logo_light.png")}
+                style={styles.logo}
+                resizeMode="contain"
+              />
+            </View>
+            <View style={styles.buttonAndSignUpContainer}>
+              <View style={styles.signUpContainer}>
+                <Text style={styles.signUpText}>אין לך משתמש?</Text>
                 <Button
-                  mode="contained"
-                  onPress={handleSubmit}
-                  loading={isLoadingLogin}
-                  // disabled={!phoneNumber}
-                  style={styles.loginButton}
-                  contentStyle={styles.loginButtonContent}
-                  labelStyle={styles.loginButtonLabel}
-                  theme={{ colors: { primary: "#000" } }}
+                  type="text"
+                  textColor="#000"
+                  style={styles.signUpLink}
+                  onPress={handleSignUp}
                 >
-                  Login
+                  הרשם
                 </Button>
               </View>
+              <Button
+                mode="contained"
+                onPress={handleSubmit}
+                loading={isLoadingLogin}
+                // disabled={!phoneNumber}
+                style={styles.loginButton}
+                contentStyle={styles.loginButtonContent}
+                labelStyle={styles.loginButtonLabel}
+                theme={{ colors: { primary: "#000" } }}
+              >
+                Login
+              </Button>
             </View>
-          )}
-        </Formik>
-      )}
+          </View>
+        )}
+      </Formik>
       {error ? <Text style={styles.errorText}>{error}</Text> : ""}
     </View>
   );

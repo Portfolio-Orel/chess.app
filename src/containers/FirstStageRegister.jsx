@@ -37,6 +37,7 @@ export default function FirstStageRegsiter({ isUserRegistered = false }) {
       {isRegistered ? (
         <OTPCodeInput
           onOTPCodeEntered={(code) => {
+            console.log("code: ", authState);
             dispatch(confirmSignUp(authState?.user?.username, code));
           }}
           isLoading={authState.isLoading}
@@ -112,6 +113,9 @@ export default function FirstStageRegsiter({ isUserRegistered = false }) {
           </Formik>
         </View>
       )}
+      {authState.error ? (
+        <Text style={{ color: "#ba221b" }}>{authState.error}</Text>
+      ) : null}
     </SafeAreaView>
   );
 }

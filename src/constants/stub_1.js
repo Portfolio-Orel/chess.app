@@ -163,8 +163,8 @@ const events = [];
 for (let i = 0; i < 20; i++) {
   const game = games[Math.floor(Math.random() * games.length)];
   const gameFormat = gameFormats[Math.floor(Math.random() * gameFormats.length)];
-  const date = new Date((new Date()).getFullYear(), Math.floor(Math.random() * 12), Math.floor(Math.random() * 30));
-
+  const date = new Date();
+  date.setDate(date.getDate() + Math.floor(Math.random() * 30));
   const event = {
     id:`${i + 1}`,
     name: `Event ${i + 1}`,

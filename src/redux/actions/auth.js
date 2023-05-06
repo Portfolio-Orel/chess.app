@@ -22,17 +22,17 @@ export const CONFIRM_SIGN_UP_REQUEST = "CONFIRM_SIGN_UP_REQUEST";
 export const CONFIRM_SIGN_UP_SUCCESS = "CONFIRM_SIGN_UP_SUCCESS";
 export const CONFIRM_SIGN_UP_FAILURE = "CONFIRM_SIGN_UP_FAILURE";
 
+export const CONFIRM_SIGN_IN_REQUEST = "CONFIRM_SIGN_IN_REQUEST";
+export const CONFIRM_SIGN_IN_SUCCESS = "CONFIRM_SIGN_IN_SUCCESS";
+export const CONFIRM_SIGN_IN_FAILURE = "CONFIRM_SIGN_IN_FAILURE";
+
 export const REGISTER_USER_DETAILS_REQUEST = "REGISTER_USER_DETAILS_REQUEST";
 export const REGISTER_USER_DETAILS_SUCCESS = "REGISTER_USER_DETAILS_SUCCESS";
 export const REGISTER_USER_DETAILS_FAILURE = "REGISTER_USER_DETAILS_FAILURE";
 
 export const LOGOUT = "LOGOUT";
 
-const buildUserName = (email) => {
-  const emailParts = email.split("@");
-  const username = emailParts.join("_");
-  return username;
-};
+const buildUserName = (email) => `cu_${email.replace("@", "_")}`;
 
 const loginRequest = () => ({
   type: LOGIN_REQUEST,
@@ -73,6 +73,20 @@ const confirmSignUpSuccess = (user) => ({
 
 const confirmSignUpFailure = (error) => ({
   type: CONFIRM_SIGN_UP_FAILURE,
+  error,
+});
+
+const confirmSignInRequest = () => ({
+  type: CONFIRM_SIGN_IN_REQUEST,
+});
+
+const confirmSignInSuccess = (user) => ({
+  type: CONFIRM_SIGN_IN_SUCCESS,
+  user,
+});
+
+const confirmSignInFailure = (error) => ({
+  type: CONFIRM_SIGN_IN_FAILURE,
   error,
 });
 
@@ -129,10 +143,12 @@ export const isAuthenticated = () => async (dispatch) => {
 export const login = (email) => async (dispatch) => {
   dispatch(loginRequest());
   try {
-    const user = await Auth.signIn(formatPhoneNumber("0543056286"));
-    // await setUser(dispatch);
+    console.log("about to sign in");
+    const user = await Auth.signIn(email);
+    console.log(user);
+    dispatch(loginSuccess(user));
   } catch (error) {
-    console.log(error);
+    console.log("error", error);
     dispatch(loginFailure(error.message ?? "Error logging in"));
   }
 };
@@ -147,14 +163,12 @@ export const register = (email, phone_number) => async (dispatch) => {
   const formattedPhoneNumber = formatPhoneNumber(phone_number);
   dispatch(signUpRequest());
   try {
-    debugger;
     const result = await Auth.signUp({
-      username: formattedPhoneNumber,
+      username: buildUserName(email),
       password: generateStrongPassword(),
       attributes: {
         email,
         phone_number: formattedPhoneNumber,
-        preferred_username: formattedPhoneNumber,
       },
       autoSignIn: { enabled: true },
     });
@@ -164,11 +178,8 @@ export const register = (email, phone_number) => async (dispatch) => {
       email,
       phoneNumber: formatPhoneNumber(phone_number),
     };
-    debugger;
     dispatch(signUpSuccess(user));
-    debugger;
   } catch (error) {
-    debugger;
     console.log(error);
     switch (error) {
       case "UsernameExistsException":
@@ -182,7 +193,7 @@ export const register = (email, phone_number) => async (dispatch) => {
 export const confirmSignUp = (username, code) => async (dispatch) => {
   dispatch(confirmSignUpRequest());
   try {
-    await Auth.confirmSignUp(username, code);
+    const result = await Auth.confirmSignUp(username, code);
     dispatch(confirmSignUpSuccess());
   } catch (error) {
     console.log(error);
@@ -197,6 +208,41 @@ export const confirmSignUp = (username, code) => async (dispatch) => {
       default:
         dispatch(
           confirmSignUpFailure(error.message ?? "Error confirming sign up")
+        );
+    }
+  }
+};
+
+export const confirmSignIn = (user, code) => async (dispatch) => {
+  dispatch(confirmSignInRequest());
+  try {
+    try {
+      console.log(await Auth.currentUserPoolUser());
+    } catch (error) {
+      console.log(error);
+    }
+    try {
+      console.log(await Auth.currentAuthenticatedUser());
+    } catch (error) {
+      console.log(error);
+    }
+    console.log(user);
+    const result = await Auth.confirmSignIn(user, code);
+    console.log(result);
+    dispatch(confirmSignInSuccess());
+  } catch (error) {
+    console.log(error);
+    switch (error) {
+      case "CodeMismatchException":
+        dispatch(confirmSignInFailure("Invalid code"));
+      case "ExpiredCodeException":
+        await Auth.resendSignUp(username); // TODO: Add a resend code button
+        dispatch(
+          confirmSignInFailure("Code expired. We've sent you a new one.")
+        );
+      default:
+        dispatch(
+          confirmSignInFailure(error.message ?? "Error confirming sign in")
         );
     }
   }
@@ -219,12 +265,12 @@ export const checkAuthState = () => async (dispatch) => {
   try {
     dispatch({ type: CHECK_AUTH_STATE_REQUEST });
     const session = await Auth.currentSession();
-    console.log(session);
+    console.log("SDASDA", session);
     if (session.isValid()) {
       await setUser(dispatch);
     }
   } catch (error) {
-    console.log(error);
+    console.log("error", error);
   } finally {
     dispatch({ type: CHECK_AUTH_STATE_DONE });
   }

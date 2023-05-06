@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import useAuthState from "../hooks/useAuthState";
-import { View, StyleSheet, Text } from "react-native";
+import { StyleSheet, ScrollView, FlatList } from "react-native";
 
 import EventCard from "../components/EventCard";
 
@@ -14,48 +14,51 @@ import { useDispatch, useSelector } from "react-redux";
 export default function Content() {
   const authState = useAuthState();
   const dispatch = useDispatch();
-  const events = useSelector((state) => state.eventsState.events);
-  const eventsParticipants = useSelector(
-    (state) => state.eventsParticipantsState.eventsParticipants
+  const eventsState = useSelector((state) => state.eventsState);
+  const eventsParticipantsState = useSelector(
+    (state) => state.eventsParticipantsState
   );
-  const games = useSelector((state) => state.gamesState.games);
-  const gameFormats = useSelector(
-    (state) => state.gameFormatsState.gameFormats
-  );
+  const gamesState = useSelector((state) => state.gamesState);
+  const gameFormatsState = useSelector((state) => {
+    return state.gameFormatsState;
+  });
 
   useEffect(() => {
+    console.log("eventsParticipantsState", eventsParticipantsState);
     if (authState.isAuthenticated) {
-      dispatch(handleFetchEvents());
-      dispatch(handleFetchGameFormats());
-      dispatch(handleFetchGames());
-      dispatch(handleFetchEventsParticipants());
+      if (!eventsState.loading) {
+        dispatch(handleFetchEvents());
+      }
+      if (!gamesState.loading) {
+        dispatch(handleFetchGameFormats());
+      }
+      if (!gameFormatsState.loading) {
+        dispatch(handleFetchGames());
+      }
+      if (!eventsParticipantsState.loading) {
+        dispatch(handleFetchEventsParticipants());
+      }
     }
   }, []);
 
-  const buildEventCards = () => {
-    return events.map((event) => {
-      // const game = games.find((game) => game.id === event.gameId);
-      // const gameFormat = gameFormats.find(
-      //   (gameFormat) => gameFormat.id === event.gameFormatId
-      // );
-      // const participants = eventsParticipants.filter(
-      //   (eventsParticipant) => eventsParticipant.eventId === event.id
-      // );
-      return <EventCard />;
-    });
-  };
-
   return (
-    <View style={styles.container}>
-      <Text>Hello {events.length}</Text>
-      {events?.slice(0, 10)?.map((event) => {
-        const game = games?.find((game) => game.id === event.gameId);
-        const gameFormat = gameFormats?.find(
+    <ScrollView
+      style={styles.scrollView}
+      contentContainerStyle={styles.container}
+      showsVerticalScrollIndicator={false}
+      overScrollMode="never"
+    >
+      {eventsState?.events?.slice(0, 10)?.map((event) => {
+        const game = gamesState?.games?.find(
+          (game) => game.id === event.gameId
+        );
+        const gameFormat = gameFormatsState?.gameFormats?.find(
           (gameFormat) => gameFormat.id === event.gameFormatId
         );
-        const participants = eventsParticipants?.filter(
-          (eventsParticipant) => eventsParticipant.eventId === event.id
-        );
+        const participants =
+          eventsParticipantsState?.eventsParticipants?.filter(
+            (eventsParticipant) => eventsParticipant.eventId === event.id
+          );
         return (
           <EventCard
             key={event.id}
@@ -66,19 +69,23 @@ export default function Content() {
           />
         );
       })}
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  flatList: {
+    flex: 1,
+  },
   container: {
-    height: "100%",
-    width: "100%",
-    display: "flex",
-    gap: 2,
-    flexDirection: "column",
-    justifyContent: "flex-start",
     alignItems: "center",
-    padding: 20,
+    justifyContent: "center",
+    marginVertical: 30,
+  },
+  separator: {
+    height: 10,
+  },
+  eventCard: {
+    marginHorizontal: 10,
   },
 });
