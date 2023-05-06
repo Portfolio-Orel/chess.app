@@ -23,12 +23,11 @@ export default function Main() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    console.log("LOL");
     dispatch(checkAuthState());
   }, [dispatch]);
 
   useEffect(() => {
-    if (authState.user?.state === states.authorized) {
+    if (authState?.state === states.authorized) {
       setIsLoggedIn(true);
     } else {
       setIsLoggedIn(false);

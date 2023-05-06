@@ -24,7 +24,6 @@ export default function Content() {
   });
 
   useEffect(() => {
-    console.log("eventsParticipantsState", eventsParticipantsState);
     if (authState.isAuthenticated) {
       if (!eventsState.loading) {
         dispatch(handleFetchEvents());

@@ -34,12 +34,11 @@ const OTPCodeInput = ({
     validationSchema
       .validate(values)
       .then(() => {
-        console.log("onOTPCodeEntered: ", values.join(""));
         onOTPCodeEntered(values.join(""));
       })
-      .catch((errors) => {
+      .catch((error) => {
         // handle validation errors
-        console.log(errors);
+        console.log(error);
       });
   };
 

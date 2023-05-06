@@ -1,16 +1,15 @@
 import axios from "axios";
-import StubData from "../constants/stub";
 
 const api = axios.create({
-  // baseURL: "http://localhost:4000",
-  baseURL: "http://10.0.2.2:4000",
+  baseURL: "http://localhost:4000",
+  // baseURL: "http://10.0.2.2:4000",
+  // baseURL: " https://0j3kvj5lpl.execute-api.us-east-1.amazonaws.com/",
   "Content-Type": "application/json",
 });
 
-const init = (userId) => {
-  if (api.defaults.headers.common["userid"] === undefined) {
-    api.defaults.headers.common["userid"] = userId;
-  }
+const init = (userId, token) => {
+  api.defaults.headers.common["UserId"] = userId;
+  api.defaults.headers.common["Authorization"] = token;
 };
 
 const fetchEvents = async () => {
@@ -55,7 +54,31 @@ const fetchIntervals = async () => {
 
 const registerToEvent = async (eventId) => {
   try {
-    await api.post(`/events/${eventId}/register`);
+    return await api.post(`/events/${eventId}/register`);
+  } catch (error) {
+    throw error;
+  }
+};
+
+const createUser = async (user) => {
+  try {
+    console.log("user", user);
+    api.defaults.headers.common["userid"] = user.id;
+    const response = await api.post(
+      "/users",
+      {
+        user_id: user.id,
+        email: user.email,
+        phone_number: user.phoneNumber,
+      },
+      {
+        headers: {
+          UserId: user.id,
+        },
+      }
+    );
+    const createdUser = response.data;
+    return createdUser;
   } catch (error) {
     throw error;
   }
@@ -68,4 +91,5 @@ export {
   fetchGameFormats,
   fetchGames,
   fetchIntervals,
+  createUser,
 };

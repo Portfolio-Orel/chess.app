@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, StyleSheet, Text } from "react-native";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { getMonthName, getDayOfMonth } from "../utils/dateUtils";
 import { FAB } from "react-native-paper";
 import Icon from "react-native-vector-icons/FontAwesome";
@@ -15,6 +15,7 @@ export default function EventCard({
   loading,
   ...props
 }) {
+  const dispatch = useDispatch();
   const authState = useSelector((state) => state.authState);
   const [isUserRegistered, setIsUserRegistered] = useState(false);
 
@@ -37,7 +38,7 @@ export default function EventCard({
         icon={({ size, color }) => (
           <Icon name="check" size={size} color="white" />
         )}
-        onPress={() => handleAddEventParticipant(event.id, authState.user.id)}
+        onPress={() => dispatch(handleAddEventParticipant(event.id))}
       />
       <View style={styles.contentContainer}>
         <View style={styles.gameDateContainer}>
@@ -81,7 +82,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
   },
   registerButton: {
-    borderRadius: "50%",
+    borderRadius: 50,
     marginStart: 10,
   },
   registeredColor: {

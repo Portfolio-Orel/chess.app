@@ -1,5 +1,5 @@
 import axios from "axios";
-
+import { registerToEvent } from "../../helper/api";
 export const FETCH_EVENT_PARTICIPANTS_REQUEST =
   "FETCH_EVENT_PARTICIPANTS_REQUEST";
 export const FETCH_EVENT_PARTICIPANTS_SUCCESS =
@@ -105,23 +105,17 @@ export const handleFetchEventsParticipants = (eventId) => async (dispatch) => {
   }
 };
 
-export const handleAddEventParticipant =
-  (eventId, user_id) => async (dispatch) => {
-    dispatch(addEventParticipantRequest());
-    try {
-      const response = await axios.post(`/api/events/${eventId}/participants`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(user_id),
-      });
-      const newEventParticipant = JSON.parse(response.data);
-      dispatch(addEventParticipantSuccess(newEventParticipant));
-    } catch (error) {
-      dispatch(addEventParticipantFailure(error.message));
-    }
-  };
+export const handleAddEventParticipant = (eventId) => async (dispatch) => {
+  dispatch(addEventParticipantRequest());
+  try {
+    const response = await registerToEvent(eventId);
+    const newEventParticipant = response.data;
+    dispatch(addEventParticipantSuccess(newEventParticipant));
+  } catch (error) {
+    console.log(error);
+    dispatch(addEventParticipantFailure(error.message));
+  }
+};
 
 export const handleUpdateEventParticipant =
   (eventId, participant) => async (dispatch) => {

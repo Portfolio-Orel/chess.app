@@ -26,9 +26,9 @@ const Login = () => {
 
   const emailSchema = Yup.string().email().required().min(3).max(255);
 
-  const handleLogin = (email) => {
+  const handleLogin = (email, password) => {
     setIsLoadingLogin(true);
-    dispatch(login(email));
+    dispatch(login(email, password));
   };
 
   const handleSignUp = () => {
@@ -39,14 +39,14 @@ const Login = () => {
     <View style={styles.container}>
       <Formik
         validationSchema={emailSchema}
-        initialValues={{ username: "", password: "" }}
-        onSubmit={(values) => handleLogin(values.username, values.password)}
+        initialValues={{ email: "", password: "" }}
+        onSubmit={(values) => handleLogin(values.email, values.password)}
       >
         {({ handleChange, handleBlur, handleSubmit, values }) => (
           <View style={styles.contentContainer}>
             <View style={styles.inputContainer}>
               <TextInput
-                name="username"
+                name="email"
                 label="אימייל"
                 theme={{
                   colors: {

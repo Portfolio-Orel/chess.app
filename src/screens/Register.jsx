@@ -18,7 +18,7 @@ export function Register() {
   );
 
   useEffect(() => {
-    if (authState?.user) {
+    if (authState?.state === states.sign_up_confirmation_required) {
       setIsRegistered(true);
     } else {
       setIsRegistered(false);

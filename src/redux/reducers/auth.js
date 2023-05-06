@@ -46,7 +46,7 @@ const authReducer = (state = initialState, action) => {
         ...state,
         isLoading: false,
         user: action.user,
-        state: states.sign_in_confirmation_required,
+        state: states.authorized,
       };
     case LOGIN_FAILURE:
       return { ...state, isLoading: false, error: action.error };

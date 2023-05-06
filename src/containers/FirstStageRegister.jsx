@@ -14,6 +14,7 @@ export default function FirstStageRegsiter({ isUserRegistered = false }) {
   const dispatch = useDispatch();
   const authState = useSelector((state) => state.authState);
   const [isRegistered, setIsRegistered] = useState(isUserRegistered);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (authState && authState.user) {
@@ -24,6 +25,7 @@ export default function FirstStageRegsiter({ isUserRegistered = false }) {
   }, [authState]);
 
   const registerSchema = Yup.object().shape({
+    password: Yup.string().required().min(8).max(16),
     phone: Yup.string()
       .matches(/^[0-9]+$/, "Must be only digits")
       .required()
@@ -37,7 +39,6 @@ export default function FirstStageRegsiter({ isUserRegistered = false }) {
       {isRegistered ? (
         <OTPCodeInput
           onOTPCodeEntered={(code) => {
-            console.log("code: ", authState);
             dispatch(confirmSignUp(authState?.user?.username, code));
           }}
           isLoading={authState.isLoading}
@@ -48,12 +49,18 @@ export default function FirstStageRegsiter({ isUserRegistered = false }) {
           <Formik
             validationSchema={registerSchema}
             initialValues={{
+              password: "12345678",
+              confirmPassword: "12345678",
               phone: "0543056286",
               email: "thischessapp@gmail.com",
             }}
-            onSubmit={(values) =>
-              dispatch(register(values.email, values.phone))
-            }
+            onSubmit={(values) => {
+              if (values.password === values.confirmPassword) {
+                dispatch(register(values.email, values.phone, values.password));
+              } else {
+                setError("הסיסמאות לא תואמות");
+              }
+            }}
           >
             {({ handleChange, handleBlur, handleSubmit, values }) => (
               <View style={styles.contentContainer}>
@@ -96,6 +103,44 @@ export default function FirstStageRegsiter({ isUserRegistered = false }) {
                       style={styles.textInput}
                     />
                   </View>
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      mode="outlined"
+                      name="password"
+                      label="סיסמא"
+                      theme={{
+                        colors: {
+                          primary: "#000", // color of the label and the outline when focused
+                          underlineColor: "transparent", // color of the underline when focused
+                        },
+                      }}
+                      placeholder=""
+                      value={values.password}
+                      onChangeText={handleChange("password")}
+                      onBlur={handleBlur("password")}
+                      secureTextEntry
+                      style={styles.textInput}
+                    />
+                  </View>
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      mode="outlined"
+                      name="confirmPassword"
+                      label="אימות סיסמא"
+                      theme={{
+                        colors: {
+                          primary: "#000", // color of the label and the outline when focused
+                          underlineColor: "transparent", // color of the underline when focused
+                        },
+                      }}
+                      placeholder=""
+                      value={values.confirmPassword}
+                      onChangeText={handleChange("confirmPassword")}
+                      onBlur={handleBlur("confirmPassword")}
+                      secureTextEntry
+                      style={styles.textInput}
+                    />
+                  </View>
                   <Text style={{ color: "#ba221b" }}>{authState?.error}</Text>
                 </View>
                 <View style={styles.buttonContainer}>
@@ -113,8 +158,10 @@ export default function FirstStageRegsiter({ isUserRegistered = false }) {
           </Formik>
         </View>
       )}
-      {authState.error ? (
-        <Text style={{ color: "#ba221b" }}>{authState.error}</Text>
+      {authState.error || error ? (
+        <Text style={{ color: "#ba221b" }}>
+          {authState.error ? authState.error : error}
+        </Text>
       ) : null}
     </SafeAreaView>
   );
