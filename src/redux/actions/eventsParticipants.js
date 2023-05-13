@@ -1,5 +1,12 @@
 import axios from "axios";
-import { registerToEvent } from "../../helper/api";
+import {
+  registerToEvent,
+  fetchEventsParticipants,
+  unregisterFromEvent,
+} from "../../helper/api";
+
+import { showSnackbar } from "./snackbar";
+
 export const FETCH_EVENT_PARTICIPANTS_REQUEST =
   "FETCH_EVENT_PARTICIPANTS_REQUEST";
 export const FETCH_EVENT_PARTICIPANTS_SUCCESS =
@@ -41,8 +48,9 @@ const fetchEventsParticipantsFailure = (error) => ({
   payload: { error },
 });
 
-const addEventParticipantRequest = () => ({
+const addEventParticipantRequest = (event_id) => ({
   type: ADD_EVENT_PARTICIPANT_REQUEST,
+  payload: { event_id },
 });
 
 const addEventParticipantSuccess = (eventParticipant) => ({
@@ -70,14 +78,14 @@ const updateEventParticipantFailure = (error) => ({
   payload: { error },
 });
 
-const deleteEventParticipantRequest = (id) => ({
+const deleteEventParticipantRequest = (event_id) => ({
   type: DELETE_EVENT_PARTICIPANT_REQUEST,
-  payload: { id },
+  payload: { event_id },
 });
 
-const deleteEventParticipantSuccess = (id) => ({
+const deleteEventParticipantSuccess = (event_id) => ({
   type: DELETE_EVENT_PARTICIPANT_SUCCESS,
-  payload: { id },
+  payload: { event_id },
 });
 
 const deleteEventParticipantFailure = (error) => ({
@@ -89,40 +97,40 @@ export const clearEventsParticipants = () => ({
   type: CLEAR_EVENT_PARTICIPANTS,
 });
 
-export const handleFetchEventsParticipants = (eventId) => async (dispatch) => {
+export const handleFetchEventsParticipants = () => async (dispatch) => {
   dispatch(fetchEventsParticipantsRequest());
   try {
-    const response = await axios.get(`/api/events/${eventId}/participants`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    const eventsParticipants = JSON.parse(response.data);
+    const eventsParticipants = await fetchEventsParticipants();
     dispatch(fetchEventsParticipantsSuccess(eventsParticipants));
   } catch (error) {
     dispatch(fetchEventsParticipantsFailure(error.message));
   }
 };
 
-export const handleAddEventParticipant = (eventId) => async (dispatch) => {
-  dispatch(addEventParticipantRequest());
-  try {
-    const response = await registerToEvent(eventId);
-    const newEventParticipant = response.data;
-    dispatch(addEventParticipantSuccess(newEventParticipant));
-  } catch (error) {
-    console.log(error);
-    dispatch(addEventParticipantFailure(error.message));
-  }
-};
+export const handleAddEventParticipant =
+  (event_id, show_snackbar = false) =>
+  async (dispatch) => {
+    dispatch(addEventParticipantRequest(event_id));
+    try {
+      const response = await registerToEvent(event_id);
+      const newEventParticipant = response.data;
+      if (show_snackbar) {
+        dispatch(showSnackbar("נרשמת בהצלחה!", "success"));
+      }
+      dispatch(addEventParticipantSuccess(newEventParticipant));
+    } catch (error) {
+      console.log(error);
+      dispatch(showSnackbar("קרתה תקלה", "error"));
+      dispatch(addEventParticipantFailure(error.message));
+    }
+  };
 
 export const handleUpdateEventParticipant =
-  (eventId, participant) => async (dispatch) => {
+  (event_id, participant) => async (dispatch) => {
     dispatch(updateEventParticipantRequest());
     try {
       const response = await axios.put(
-        `/api/events/${eventId}/participants/${participant.id}`,
+        `/api/events/${event_id}/participants/${participant.id}`,
         {
           method: "PUT",
           headers: {
@@ -139,17 +147,17 @@ export const handleUpdateEventParticipant =
   };
 
 export const handleDeleteEventParticipant =
-  (eventId, id) => async (dispatch) => {
-    dispatch(deleteEventParticipantRequest());
+  (event_id, show_snackbar = false) =>
+  async (dispatch) => {
     try {
-      await axios.delete(`/api/events/${eventId}/participants/${id}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      dispatch(deleteEventParticipantSuccess(id));
+      dispatch(deleteEventParticipantRequest(event_id));
+      await unregisterFromEvent(event_id);
+      if (show_snackbar) {
+        dispatch(showSnackbar("הרישום בוטל!", "success"));
+      }
+      dispatch(deleteEventParticipantSuccess(event_id));
     } catch (error) {
+      dispatch(showSnackbar("קרתה תקלה", "error"));
       dispatch(deleteEventParticipantFailure(error.message));
     }
   };

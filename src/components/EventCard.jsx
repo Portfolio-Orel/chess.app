@@ -1,32 +1,46 @@
 import React, { useEffect, useState } from "react";
 import { View, StyleSheet, Text } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
+import useData from "../hooks/useData";
 import { getMonthName, getDayOfMonth } from "../utils/dateUtils";
 import { FAB } from "react-native-paper";
 import Icon from "react-native-vector-icons/FontAwesome";
+import Loading from "./Loading";
 
-import { handleAddEventParticipant } from "../redux/actions/eventsParticipants";
+import {
+  handleAddEventParticipant,
+  handleDeleteEventParticipant,
+} from "../redux/actions/eventsParticipants";
 
-export default function EventCard({
-  event,
-  game,
-  gameFormat,
-  participants,
-  loading,
-  ...props
-}) {
+export default function EventCard({ event, ...props }) {
   const dispatch = useDispatch();
+  const data = useData();
   const authState = useSelector((state) => state.authState);
+
+  const [game, setGame] = useState({});
+  const [gameFormat, setGameFormat] = useState({});
   const [isUserRegistered, setIsUserRegistered] = useState(false);
 
   useEffect(() => {
+    const game = data.games?.find((game) => game.id === event.game_id);
+    const gameFormat = data.gameFormats.find(
+      (gameFormat) => gameFormat.id === event.game_format_id
+    );
+    setGame(game);
+    setGameFormat(gameFormat);
+  }, [data.games, data.gameFormats, event.game_id, event.game_format_id]);
+
+  useEffect(() => {
     if (authState.user) {
-      const userParticipant = participants.find(
-        (participant) => participant.userId === authState.user.id
-      );
+      const userParticipant =
+        data.eventsParticipantsState.eventsParticipants.find(
+          (participant) =>
+            participant.user_id === authState.user.id &&
+            participant.event_id === event.id
+        );
       setIsUserRegistered(userParticipant ? true : false);
     }
-  }, [authState]);
+  }, [authState, data.eventsParticipantsState]);
 
   return (
     <View style={styles.container} {...props}>
@@ -35,10 +49,25 @@ export default function EventCard({
           styles.registerButton,
           isUserRegistered ? styles.registeredColor : styles.notRegisteredColor,
         ]}
-        icon={({ size, color }) => (
-          <Icon name="check" size={size} color="white" />
-        )}
-        onPress={() => dispatch(handleAddEventParticipant(event.id))}
+        animated={false}
+        icon={({ size, color }) =>
+          data.eventsParticipantsState.event_id_loading === event.id ? (
+            <Loading color={color} />
+          ) : (
+            <Icon
+              name={isUserRegistered ? "check" : "plus"}
+              size={size}
+              color="white"
+            />
+          )
+        }
+        onPress={() => {
+          if (isUserRegistered) {
+            dispatch(handleDeleteEventParticipant(event.id, true));
+          } else {
+            dispatch(handleAddEventParticipant(event.id, true));
+          }
+        }}
       />
       <View style={styles.contentContainer}>
         <View style={styles.gameDateContainer}>

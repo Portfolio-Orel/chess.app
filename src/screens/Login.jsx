@@ -1,33 +1,27 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 
 import * as Yup from "yup";
 import { Formik } from "formik";
 
 import { View, Text, Image, StyleSheet } from "react-native";
-import { Button, TextInput } from "react-native-paper";
-
-import OTPCodeInput from "../components/OTPCodeInput";
+import { TextInput } from "react-native-paper";
+import CustomButton from "../components/CustomButton";
 
 import { useNavigation } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
 
-import { confirmSignIn, login } from "../redux/actions/auth";
+import { login } from "../redux/actions/auth";
 
 import screens from "../constants/screens";
-import states from "../constants/states";
 
 const Login = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const authState = useSelector((state) => state.authState);
 
-  const [isLoadingLogin, setIsLoadingLogin] = useState(false);
-  const [error, setError] = useState("");
-
   const emailSchema = Yup.string().email().required().min(3).max(255);
 
   const handleLogin = (email, password) => {
-    setIsLoadingLogin(true);
     dispatch(login(email, password));
   };
 
@@ -39,8 +33,20 @@ const Login = () => {
     <View style={styles.container}>
       <Formik
         validationSchema={emailSchema}
-        initialValues={{ email: "", password: "" }}
-        onSubmit={(values) => handleLogin(values.email, values.password)}
+        initialValues={{
+          email: "thischessapp@gmail.com",
+          password: "12345678",
+        }}
+        onSubmit={(values) => {
+          if (
+            !emailSchema.isValidSync(values.email) ||
+            values.password === "" ||
+            authState?.isLoading
+          ) {
+            return;
+          }
+          handleLogin(values.email, values.password);
+        }}
       >
         {({ handleChange, handleBlur, handleSubmit, values }) => (
           <View style={styles.contentContainer}>
@@ -78,6 +84,7 @@ const Login = () => {
                 keyboardType="visible-password"
                 style={styles.textInput}
               />
+              <Text style={styles.errorText}>{authState?.error ?? ""}</Text>
             </View>
             <View style={styles.logoContainer}>
               <Image
@@ -89,38 +96,39 @@ const Login = () => {
             <View style={styles.buttonAndSignUpContainer}>
               <View style={styles.signUpContainer}>
                 <Text style={styles.signUpText}>אין לך משתמש?</Text>
-                <Button
+                <CustomButton
                   type="text"
                   textColor="#000"
                   style={styles.signUpLink}
                   onPress={handleSignUp}
                 >
                   הרשם
-                </Button>
+                </CustomButton>
               </View>
-              <Button
+              <CustomButton
                 mode="contained"
                 onPress={handleSubmit}
-                loading={isLoadingLogin}
-                // disabled={!phoneNumber}
+                loading={authState?.isLoading}
+                disabled={values.email === "" || values.password === ""}
                 style={styles.loginButton}
                 contentStyle={styles.loginButtonContent}
                 labelStyle={styles.loginButtonLabel}
                 theme={{ colors: { primary: "#000" } }}
               >
-                Login
-              </Button>
+                התחבר
+              </CustomButton>
             </View>
           </View>
         )}
       </Formik>
-      {error ? <Text style={styles.errorText}>{error}</Text> : ""}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    width: "100%",
+    height: "100%",
     padding: 20,
     backgroundColor: "rgba(255, 255, 255, 0.3)",
   },
@@ -147,9 +155,12 @@ const styles = StyleSheet.create({
   },
   logo: {
     width: "100%",
-    height: undefined,
     aspectRatio: 1,
     height: 250,
+  },
+  logoContainer: {
+    width: "100%",
+    aspectRatio: 1,
   },
   textInput: {
     backgroundColor: "#fff",

@@ -3,12 +3,13 @@ import axios from "axios";
 const api = axios.create({
   baseURL: "http://localhost:4000",
   // baseURL: "http://10.0.2.2:4000",
-  // baseURL: " https://0j3kvj5lpl.execute-api.us-east-1.amazonaws.com/",
+  // baseURL: "https://0j3kvj5lpl.execute-api.us-east-1.amazonaws.com/",
   "Content-Type": "application/json",
 });
 
-const init = (userId, token) => {
-  api.defaults.headers.common["UserId"] = userId;
+const init = (user_id, token, clubId) => {
+  api.defaults.headers.common["UserId"] = user_id;
+  api.defaults.headers.common["ClubId"] = clubId;
   api.defaults.headers.common["Authorization"] = token;
 };
 
@@ -17,6 +18,16 @@ const fetchEvents = async () => {
     const response = await api.get("/events");
     const events = response.data;
     return events;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const fetchEventsParticipants = async () => {
+  try {
+    const response = await api.get(`/participants`);
+    const eventsParticipants = response.data;
+    return eventsParticipants;
   } catch (error) {
     throw error;
   }
@@ -52,9 +63,45 @@ const fetchIntervals = async () => {
   }
 };
 
-const registerToEvent = async (eventId) => {
+const fetchClubs = async () => {
   try {
-    return await api.post(`/events/${eventId}/register`);
+    const response = await api.get("/clubs");
+    const clubs = response.data;
+    return clubs;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const registerToEvent = async (event_id) => {
+  try {
+    return await api.post(`/events/${event_id}/register`);
+  } catch (error) {
+    throw error;
+  }
+};
+
+const unregisterFromEvent = async (event_id) => {
+  try {
+    return await api.post(`/events/${event_id}/unregister`);
+  } catch (error) {
+    throw error;
+  }
+};
+
+const completeRegistration = async (
+  firstName,
+  lastName,
+  playerNumber,
+  clubId
+) => {
+  try {
+    await api.put(`/users/completeRegistration`, {
+      first_name: firstName,
+      last_name: lastName,
+      player_number: playerNumber,
+      club_id: clubId,
+    });
   } catch (error) {
     throw error;
   }
@@ -62,8 +109,6 @@ const registerToEvent = async (eventId) => {
 
 const createUser = async (user) => {
   try {
-    console.log("user", user);
-    api.defaults.headers.common["userid"] = user.id;
     const response = await api.post(
       "/users",
       {
@@ -73,7 +118,7 @@ const createUser = async (user) => {
       },
       {
         headers: {
-          UserId: user.id,
+          user_id: user.id,
         },
       }
     );
@@ -88,8 +133,12 @@ export {
   init,
   fetchEvents,
   registerToEvent,
+  fetchEventsParticipants,
   fetchGameFormats,
   fetchGames,
   fetchIntervals,
   createUser,
+  unregisterFromEvent,
+  completeRegistration,
+  fetchClubs,
 };

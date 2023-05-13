@@ -39,7 +39,6 @@ const authReducer = (state = initialState, action) => {
         ...state,
         isLoading: true,
         error: null,
-        state: states.unauthorized,
       };
     case LOGIN_SUCCESS:
       return {
@@ -49,7 +48,12 @@ const authReducer = (state = initialState, action) => {
         state: states.authorized,
       };
     case LOGIN_FAILURE:
-      return { ...state, isLoading: false, error: action.error };
+      return {
+        ...state,
+        isLoading: false,
+        error: action.error,
+        isLoading: false,
+      };
     case LOGOUT:
       return { ...state, user: null };
     case REGISTER_REQUEST:
@@ -58,7 +62,8 @@ const authReducer = (state = initialState, action) => {
       return {
         ...state,
         isLoading: false,
-        user: { ...action.user, state: states.sign_up_confirmation_required },
+        user: { ...action.user },
+        state: states.sign_up_confirmation_required,
       };
     case REGISTER_FAILURE:
       return {
@@ -73,7 +78,7 @@ const authReducer = (state = initialState, action) => {
       return {
         ...state,
         isLoading: false,
-        user: { ...state.user, state: states.authorized },
+        state: states.register_user_details_required,
       };
     case CONFIRM_SIGN_UP_FAILURE:
       return {
@@ -88,7 +93,7 @@ const authReducer = (state = initialState, action) => {
       return {
         ...state,
         isLoading: false,
-        user: { ...state.user, state: states.authorized },
+        state: states.authorized,
       };
     case CONFIRM_SIGN_IN_FAILURE:
       return {
@@ -103,7 +108,8 @@ const authReducer = (state = initialState, action) => {
       return {
         ...state,
         isLoading: false,
-        user: { ...state.user, ...action.user, isRegistrationCompleted: true },
+        user: { ...state.user, ...action.user },
+        state: states.authorized,
       };
     case REGISTER_USER_DETAILS_FAILURE:
       return {

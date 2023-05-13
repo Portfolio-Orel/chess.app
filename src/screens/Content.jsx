@@ -1,72 +1,43 @@
-import React, { useEffect } from "react";
-import useAuthState from "../hooks/useAuthState";
-import { StyleSheet, ScrollView, FlatList } from "react-native";
+import React, { useEffect, useState } from "react";
+import { StyleSheet, ScrollView } from "react-native";
+import { ActivityIndicator } from "react-native-paper";
 
 import EventCard from "../components/EventCard";
 
-import { handleFetchEvents } from "../redux/actions/event";
-import { handleFetchGameFormats } from "../redux/actions/gameFormats";
-import { handleFetchGames } from "../redux/actions/games";
-import { handleFetchEventsParticipants } from "../redux/actions/eventsParticipants";
-
-import { useDispatch, useSelector } from "react-redux";
+import useAuth from "../hooks/useAuth";
+import useData from "../hooks/useData";
 
 export default function Content() {
-  const authState = useAuthState();
-  const dispatch = useDispatch();
-  const eventsState = useSelector((state) => state.eventsState);
-  const eventsParticipantsState = useSelector(
-    (state) => state.eventsParticipantsState
-  );
-  const gamesState = useSelector((state) => state.gamesState);
-  const gameFormatsState = useSelector((state) => {
-    return state.gameFormatsState;
-  });
+  const data = useData();
+  const authState = useAuth();
+
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (authState.isAuthenticated) {
-      if (!eventsState.loading) {
-        dispatch(handleFetchEvents());
-      }
-      if (!gamesState.loading) {
-        dispatch(handleFetchGameFormats());
-      }
-      if (!gameFormatsState.loading) {
-        dispatch(handleFetchGames());
-      }
-      if (!eventsParticipantsState.loading) {
-        dispatch(handleFetchEventsParticipants());
-      }
+      data.fetch();
     }
-  }, []);
+  }, [authState.isAuthenticated]);
 
-  return (
+  useEffect(() => {
+    if (data.events) {
+      setEvents(data.events);
+    }
+    setLoading(data.loading);
+  }, [data.events, data.loading]);
+
+  return loading ? (
+    <ActivityIndicator size="large" color="#0000ff" />
+  ) : (
     <ScrollView
       style={styles.scrollView}
       contentContainerStyle={styles.container}
       showsVerticalScrollIndicator={false}
       overScrollMode="never"
     >
-      {eventsState?.events?.slice(0, 10)?.map((event) => {
-        const game = gamesState?.games?.find(
-          (game) => game.id === event.gameId
-        );
-        const gameFormat = gameFormatsState?.gameFormats?.find(
-          (gameFormat) => gameFormat.id === event.gameFormatId
-        );
-        const participants =
-          eventsParticipantsState?.eventsParticipants?.filter(
-            (eventsParticipant) => eventsParticipant.eventId === event.id
-          );
-        return (
-          <EventCard
-            key={event.id}
-            event={event}
-            game={game}
-            gameFormat={gameFormat}
-            participants={participants}
-          />
-        );
+      {events?.slice(0, 10)?.map((event) => {
+        return <EventCard key={event.id} event={event} />;
       })}
     </ScrollView>
   );

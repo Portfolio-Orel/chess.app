@@ -10,10 +10,10 @@ export const formatPhoneNumber = (phoneNumber) => {
 };
 
 /**
- * Returns userId in the form of: cu_+972XXXXXXXX
+ * Returns user_id in the form of: cu_+972XXXXXXXX
  * @param {*} phoneNumber is the phone number of the user
  */
-export const buildUserId = (phoneNumber) => {
+export const builduser_id = (phoneNumber) => {
   const formattedPhoneNumber = formatPhoneNumber(phoneNumber);
   return `cu_${formattedPhoneNumber}`;
 };

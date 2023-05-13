@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import states from "../constants/states";
 import Login from "./Login";
 import Register from "./Register";
+import OTPCodeInput from "../containers/OTPCodeInput";
 
 import screens from "../constants/screens";
 
@@ -13,11 +14,13 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import { checkAuthState } from "../redux/actions/auth";
 import Content from "./Content";
+import CustomSnackbar from "../components/Snackbar";
 
 const Stack = createNativeStackNavigator();
 
 export default function Main() {
   const dispatch = useDispatch();
+
   const authState = useSelector((state) => state.authState);
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -74,8 +77,20 @@ export default function Main() {
               },
             }}
           />
+          <Stack.Screen
+            name={screens.otpInput.route}
+            component={OTPCodeInput}
+            options={{
+              title: screens.otpInput.title,
+              headerTitleAlign: "right",
+              headerTitleStyle: {
+                writingDirection: "rtl",
+              },
+            }}
+          />
         </CustomNavigator>
       )}
+      <CustomSnackbar />
     </NavigationContainer>
   );
 }

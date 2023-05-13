@@ -37,39 +37,40 @@ const intervalsReducer = (state = initialState, action) => {
       return { ...state, loading: false, error: action.payload.error };
 
     case ADD_INTERVAL_REQUEST:
-      return { ...state, loading: true, error: null };
+      return { ...state, error: null };
     case ADD_INTERVAL_SUCCESS:
       return {
         ...state,
-        loading: false,
         intervals: state.intervals.concat(action.payload.interval),
       };
     case ADD_INTERVAL_FAILURE:
-      return { ...state, loading: false, error: action.payload.error };
+      return { ...state, error: action.payload.error };
 
     case UPDATE_INTERVAL_REQUEST:
-      return { ...state, loading: true, error: null };
+      return { ...state, error: null };
     case UPDATE_INTERVAL_SUCCESS:
       return {
         ...state,
-        loading: false,
         intervals: state.intervals.map((interval) =>
-          interval.id === action.payload.interval.id ? action.payload.interval : interval
+          interval.id === action.payload.interval.id
+            ? action.payload.interval
+            : interval
         ),
       };
     case UPDATE_INTERVAL_FAILURE:
-      return { ...state, loading: false, error: action.payload.error };
+      return { ...state, error: action.payload.error };
 
     case DELETE_INTERVAL_REQUEST:
-      return { ...state, loading: true, error: null };
+      return { ...state, error: null };
     case DELETE_INTERVAL_SUCCESS:
       return {
         ...state,
-        loading: false,
-        intervals: state.intervals.filter((interval) => interval.id !== action.payload.interval.id),
+        intervals: state.intervals.filter(
+          (interval) => interval.id !== action.payload.interval.id
+        ),
       };
     case DELETE_INTERVAL_FAILURE:
-      return { ...state, loading: false, error: action.payload.error };
+      return { ...state, error: action.payload.error };
 
     case CLEAR_INTERVALS:
       return { ...state, intervals: [] };

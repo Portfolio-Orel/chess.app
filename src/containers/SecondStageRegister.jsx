@@ -1,46 +1,47 @@
 import React from "react";
 import { View, StyleSheet, Text } from "react-native";
-import { TextInput } from "react-native-paper";
+import { TextInput, ActivityIndicator } from "react-native-paper";
 import CustomButton from "../components/CustomButton";
 import { Formik } from "formik";
-import * as Yup from "yup";
-import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { register } from "../redux/actions/auth";
+import { completeRegistration } from "../redux/actions/auth";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Dropdown from "../components/Dropdown";
+import { useEffect } from "react";
+import { handleFetchClubs } from "../redux/actions/clubs";
 
-export default function FirstStageRegsiter({ isUserRegistered = false }) {
+export default function FirstStageRegsiter() {
   const dispatch = useDispatch();
   const authState = useSelector((state) => state.authState);
-  const [error, setError] = useState("");
+  const clubsState = useSelector((state) => state.clubsState);
 
-  const registerSchema = Yup.object().shape({
-    password: Yup.string().required().min(8).max(16),
-    phone: Yup.string()
-      .matches(/^[0-9]+$/, "Must be only digits")
-      .required()
-      .min(10)
-      .max(10),
-    email: Yup.string().email().required().min(3).max(255),
-  });
+  useEffect(() => {
+    dispatch(handleFetchClubs());
+  }, []);
 
   return (
     <SafeAreaView>
       <View style={styles.container}>
         <Text style={styles.title}>פרטי התחברות</Text>
         <Formik
-          validationSchema={registerSchema}
           initialValues={{
-            password: "12345678",
-            confirmPassword: "12345678",
-            phone: "0543056286",
-            email: "thischessapp@gmail.com",
+            firstName: "אוראל",
+            lastName: "זילברמן",
+            clubId: "",
+            playerNumber: "202511",
           }}
           onSubmit={(values) => {
-            if (values.password === values.confirmPassword) {
-              dispatch(register(values.email, values.phone, values.password));
+            if (values.firstName && values.lastName && values.clubId) {
+              dispatch(
+                completeRegistration(
+                  values.firstName,
+                  values.lastName,
+                  values.playerNumber,
+                  values.clubId
+                )
+              );
             } else {
-              setError("הסיסמאות לא תואמות");
+              // TODO: set error to fields
             }
           }}
         >
@@ -50,8 +51,8 @@ export default function FirstStageRegsiter({ isUserRegistered = false }) {
                 <View style={styles.inputContainer}>
                   <TextInput
                     mode="outlined"
-                    name="phone"
-                    label="מספר טלפון"
+                    name="firstName"
+                    label="שם פרטי"
                     theme={{
                       colors: {
                         primary: "#000", // color of the label and the outline when focused
@@ -59,18 +60,17 @@ export default function FirstStageRegsiter({ isUserRegistered = false }) {
                       },
                     }}
                     placeholder=""
-                    value={values.phone}
-                    onChangeText={handleChange("phone")}
-                    onBlur={handleBlur("phone")}
-                    keyboardType="phone-pad"
+                    value={values.firstName}
+                    onChangeText={handleChange("firstName")}
+                    onBlur={handleBlur("firstName")}
                     style={styles.textInput}
                   />
                 </View>
                 <View style={styles.inputContainer}>
                   <TextInput
                     mode="outlined"
-                    name="email"
-                    label="אימייל"
+                    name="lastName"
+                    label="שם משפחה"
                     theme={{
                       colors: {
                         primary: "#000", // color of the label and the outline when focused
@@ -78,18 +78,17 @@ export default function FirstStageRegsiter({ isUserRegistered = false }) {
                       },
                     }}
                     placeholder=""
-                    value={values.email}
-                    onChangeText={handleChange("email")}
-                    onBlur={handleBlur("email")}
-                    keyboardType="email-address"
+                    value={values.lastName}
+                    onChangeText={handleChange("lastName")}
+                    onBlur={handleBlur("lastName")}
                     style={styles.textInput}
                   />
                 </View>
                 <View style={styles.inputContainer}>
                   <TextInput
                     mode="outlined"
-                    name="password"
-                    label="סיסמא"
+                    name="clubId"
+                    label="מועדון"
                     theme={{
                       colors: {
                         primary: "#000", // color of the label and the outline when focused
@@ -97,18 +96,31 @@ export default function FirstStageRegsiter({ isUserRegistered = false }) {
                       },
                     }}
                     placeholder=""
-                    value={values.password}
-                    onChangeText={handleChange("password")}
-                    onBlur={handleBlur("password")}
+                    value={values.clubId}
+                    onChangeText={handleChange("clubId")}
+                    onBlur={handleBlur("clubId")}
                     secureTextEntry
                     style={styles.textInput}
                   />
+                  {clubsState.loading ? (
+                    <ActivityIndicator />
+                  ) : (
+                    <Dropdown
+                      items={clubsState?.clubs?.map((club) => ({
+                        label: club.name,
+                        value: club.id,
+                      }))}
+                      onItemSelected={(clubId) => {
+                        handleChange("clubId")(clubId);
+                      }}
+                    />
+                  )}
                 </View>
                 <View style={styles.inputContainer}>
                   <TextInput
                     mode="outlined"
-                    name="confirmPassword"
-                    label="אימות סיסמא"
+                    name="playerNumber"
+                    label="מספר שחקן ישראל"
                     theme={{
                       colors: {
                         primary: "#000", // color of the label and the outline when focused
@@ -116,10 +128,9 @@ export default function FirstStageRegsiter({ isUserRegistered = false }) {
                       },
                     }}
                     placeholder=""
-                    value={values.confirmPassword}
-                    onChangeText={handleChange("confirmPassword")}
-                    onBlur={handleBlur("confirmPassword")}
-                    secureTextEntry
+                    value={values.playerNumber}
+                    onChangeText={handleChange("playerNumber")}
+                    onBlur={handleBlur("playerNumber")}
                     style={styles.textInput}
                   />
                 </View>
@@ -132,7 +143,7 @@ export default function FirstStageRegsiter({ isUserRegistered = false }) {
                   loading={authState.isLoading}
                   style={styles.button}
                 >
-                  המשך
+                  <Text style={styles.buttonText}>המשך</Text>
                 </CustomButton>
               </View>
             </View>

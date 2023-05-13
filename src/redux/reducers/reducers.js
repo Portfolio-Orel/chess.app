@@ -6,6 +6,7 @@ import eventsParticipantsReducer from "./eventsParticipants";
 import gameReducer from "./games";
 import gameFormatsReducer from "./gameFormats";
 import intervalsReducer from "./intervals";
+import clubsReducer from "./clubs";
 import snacbbarReducer from "./snackbar";
 
 export default combineReducers({
@@ -16,4 +17,5 @@ export default combineReducers({
   gameFormatsState: gameFormatsReducer,
   intervalsState: intervalsReducer,
   snackbarState: snacbbarReducer,
+  clubsState: clubsReducer,
 });

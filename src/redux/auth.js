@@ -29,7 +29,7 @@ const setUser = async (dispatch) => {
   const idToken = session.idToken.jwtToken;
   const user = await Auth.currentAuthenticatedUser();
   axios.defaults.headers.common["Authorization"] = idToken;
-  axios.defaults.headers.common["userid"] = user.username;
+  axios.defaults.headers.common["user_id"] = user.username;
   const result = await axios.get("/api/users");
   const userFromServer = JSON.parse(result.data);
   if (userFromServer.role !== "admin" && userFromServer.role !== "superadmin") {

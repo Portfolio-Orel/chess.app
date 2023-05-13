@@ -37,35 +37,33 @@ const gamesReducer = (state = initialState, action) => {
       return { ...state, loading: false, error: action.payload.error };
 
     case ADD_GAME_REQUEST:
-      return { ...state, loading: true, error: null };
+      return { ...state, error: null };
     case ADD_GAME_SUCCESS:
-      return { ...state, loading: false, games: state.games.concat(action.payload.game) };
+      return { ...state, games: state.games.concat(action.payload.game) };
     case ADD_GAME_FAILURE:
-      return { ...state, loading: false, error: action.payload.error };
+      return { ...state, error: action.payload.error };
 
     case UPDATE_GAME_REQUEST:
-      return { ...state, loading: true, error: null };
+      return { ...state, error: null };
     case UPDATE_GAME_SUCCESS:
       return {
         ...state,
-        loading: false,
         games: state.games.map((game) =>
           game.id === action.payload.game.id ? action.payload.game : game
         ),
       };
     case UPDATE_GAME_FAILURE:
-      return { ...state, loading: false, error: action.payload.error };
+      return { ...state, error: action.payload.error };
 
     case DELETE_GAME_REQUEST:
-      return { ...state, loading: true, error: null };
+      return { ...state, error: null };
     case DELETE_GAME_SUCCESS:
       return {
         ...state,
-        loading: false,
         games: state.games.filter((game) => game.id !== action.payload.game.id),
       };
     case DELETE_GAME_FAILURE:
-      return { ...state, loading: false, error: action.payload.error };
+      return { ...state, error: action.payload.error };
 
     case CLEAR_GAMES:
       return { ...state, games: [] };

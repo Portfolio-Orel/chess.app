@@ -1,10 +1,11 @@
 import { Auth } from "aws-amplify";
-import {
-  generateStrongPassword,
-  formatPhoneNumber,
-} from "../../utils/authUtils";
+import { formatPhoneNumber } from "../../utils/authUtils";
 import axios from "axios";
-import { createUser, init as initApi } from "../../helper/api";
+import {
+  createUser,
+  init as initApi,
+  completeRegistration as completeRegistrationApi,
+} from "../../helper/api";
 import states from "../../constants/states";
 
 export const LISTEN_TO_AUTH_STATE_CHANGE = "LISTEN_TO_AUTH_STATE_CHANGE";
@@ -100,9 +101,14 @@ const registerUserDetailsRequest = () => ({
   type: REGISTER_USER_DETAILS_REQUEST,
 });
 
-const registerUserDetailsSuccess = (user) => ({
+const registerUserDetailsSuccess = (
+  firstName,
+  lastName,
+  playerNumber,
+  clubId
+) => ({
   type: REGISTER_USER_DETAILS_SUCCESS,
-  user,
+  user: { firstName, lastName, playerNumber, clubId },
 });
 
 const registerUserDetailsFailure = (error) => ({
@@ -114,16 +120,19 @@ const logout = () => ({
   type: LOGOUT,
 });
 
-const setUser = async (dispatch) => {
+const setUser = async (dispatch, extras = {}) => {
   try {
     const session = await Auth.currentSession();
     const idToken = session.idToken.jwtToken;
     const user = await Auth.currentAuthenticatedUser();
-    initApi(user.attributes.sub, idToken);
+    const user_id = user.attributes.sub;
+    initApi(user_id, idToken);
     dispatch(
       loginSuccess({
         username: user.username,
+        id: user_id,
         token: idToken,
+        ...extras,
       })
     );
   } catch (error) {
@@ -135,7 +144,7 @@ const setUser = async (dispatch) => {
 export const isAuthenticated = () => async (dispatch) => {
   const session = await Auth.currentSession();
   if (session.isValid()) {
-    await setUser(dispatch, states.authorized);
+    await setUser(dispatch);
   }
 };
 export const login = (email, password) => async (dispatch) => {
@@ -148,13 +157,13 @@ export const login = (email, password) => async (dispatch) => {
     console.log(error);
     switch (error.code) {
       case "UserNotFoundException":
-        dispatch(loginFailure("User does not exist"));
+        dispatch(loginFailure("שם המשתמש לא קיים..."));
         break;
       case "NotAuthorizedException":
-        dispatch(loginFailure("Incorrect username or password"));
+        dispatch(loginFailure("שם המשתמש או הסיסמא לא נכונים.. ננסה שוב?"));
         break;
       default:
-        dispatch(loginFailure(error.message ?? "Error logging in"));
+        dispatch(loginFailure(error.message ?? "יש פה בעיה.. אנחנו על זה"));
     }
   }
 };
@@ -179,17 +188,20 @@ export const register = (email, phone_number, password) => async (dispatch) => {
       },
       autoSignIn: { enabled: true },
     });
+
     const user = {
       username: result.user.getUsername(),
-      userId: result.userSub,
+      user_id: result.userSub,
       email,
       phoneNumber: formatPhoneNumber(phone_number),
     };
     await createUser({
-      id: user.userId,
+      id: user.user_id,
       email: user.email,
       phoneNumber: user.phoneNumber,
     });
+
+    initApi(user.user_id);
     dispatch(signUpSuccess(user));
   } catch (error) {
     console.log(error);
@@ -205,7 +217,7 @@ export const register = (email, phone_number, password) => async (dispatch) => {
 export const confirmSignUp = (username, code) => async (dispatch) => {
   dispatch(confirmSignUpRequest());
   try {
-    const result = await Auth.confirmSignUp(username, code);
+    await Auth.confirmSignUp(username, code);
     dispatch(confirmSignUpSuccess());
   } catch (error) {
     console.log(error);
@@ -228,7 +240,7 @@ export const confirmSignUp = (username, code) => async (dispatch) => {
 export const confirmSignIn = (user, code) => async (dispatch) => {
   try {
     dispatch(confirmSignInRequest());
-    const result = await Auth.confirmSignIn(user, code);
+    await Auth.confirmSignIn(user, code);
     dispatch(confirmSignInSuccess());
   } catch (error) {
     console.log(error);
@@ -248,18 +260,21 @@ export const confirmSignIn = (user, code) => async (dispatch) => {
   }
 };
 
-export const registerUserDetails = (user) => async (dispatch) => {
-  dispatch(registerUserDetailsRequest());
-  try {
-    const result = await axios.put("/users", user);
-    const userFromServer = JSON.parse(result.data);
-    dispatch(registerUserDetailsSuccess(userFromServer));
-  } catch (error) {
-    dispatch(
-      registerUserDetailsFailure(error.message ?? "Error registering user")
-    );
-  }
-};
+export const completeRegistration =
+  (firstName, lastName, playerNumber, clubId) => async (dispatch) => {
+    dispatch(registerUserDetailsRequest());
+    try {
+      await completeRegistrationApi(firstName, lastName, playerNumber, clubId);
+      await setUser(dispatch, { firstName, lastName, playerNumber, clubId });
+      dispatch(
+        registerUserDetailsSuccess(firstName, lastName, playerNumber, clubId)
+      );
+    } catch (error) {
+      dispatch(
+        registerUserDetailsFailure(error.message ?? "Error registering user")
+      );
+    }
+  };
 
 export const checkAuthState = () => async (dispatch) => {
   try {

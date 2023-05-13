@@ -1,50 +1,46 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { Formik } from "formik";
+
 import FirstStageRegsiter from "../containers/FirstStageRegister";
+import SecondStageRegister from "../containers/SecondStageRegister";
+import OTPCodeInput from "../containers/OTPCodeInput";
+
 import { useSelector } from "react-redux";
-import { useState } from "react";
-import { useEffect } from "react";
 
 import states from "../constants/states";
+import { useMemo } from "react";
 
 export function Register() {
   const authState = useSelector((state) => state.authState);
-  const [isRegistered, setIsRegistered] = useState(
-    authState.user ? true : false
-  );
-  const [isConfirmed, setIsConfirmed] = useState(
-    authState.state === states.authorized ? true : false
-  );
 
-  useEffect(() => {
-    if (authState?.state === states.sign_up_confirmation_required) {
-      setIsRegistered(true);
-    } else {
-      setIsRegistered(false);
+  const Content = useMemo(() => {
+    switch (authState?.state) {
+      case states.unauthorized:
+        return <FirstStageRegsiter />;
+      case states.register_user_details_required:
+        return <SecondStageRegister />;
+      case states.sign_up_confirmation_required:
+        return <OTPCodeInput />;
+      default:
+        return <FirstStageRegsiter />;
     }
-    if (authState?.state === states.authorized) {
-      setIsConfirmed(true);
-    } else {
-      setIsConfirmed(false);
-    }
-  }, [authState]);
+  }, [authState.state]);
 
   return (
     <View style={styles.container}>
-      {
-        <Formik
-          initialValues={{ email: "" }}
-          onSubmit={(values) => console.log(values)}
-        >
-          {({ handleChange, handleBlur, handleSubmit, values }) => (
-            <FirstStageRegsiter />
-          )}
-        </Formik>
-      }
+      <Formik
+        initialValues={{ email: "" }}
+        onSubmit={(values) => console.log(values)}
+      >
+        {({ handleChange, handleBlur, handleSubmit, values }) => (
+          <React.Fragment>{Content}</React.Fragment>
+        )}
+      </Formik>
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     padding: 20,

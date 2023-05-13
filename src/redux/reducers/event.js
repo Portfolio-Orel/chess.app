@@ -37,18 +37,18 @@ const eventsReducer = (state = initialState, action) => {
       return { ...state, loading: false, error: action.payload.error };
 
     case ADD_EVENT_REQUEST:
-      return { ...state, loading: true, error: null };
+      return { ...state, error: null };
     case ADD_EVENTS_SUCCESS:
       return {
         ...state,
-        loading: false,
         events: state.events.concat(action.payload.event),
       };
     case ADD_EVENT_FAILURE:
-      return { ...state, loading: false, error: action.payload.error };
+      return { ...state, error: action.payload.error };
 
     case UPDATE_EVENT_REQUEST:
-      return { ...state, loading: true, error: null };
+      return { ...state, error: null };
+
     case UPDATE_EVENT_SUCCESS:
       const updatedEvents = state.events.map((event) => {
         if (event.id === action.payload.event.id) {
@@ -56,16 +56,17 @@ const eventsReducer = (state = initialState, action) => {
         }
         return event;
       });
-      return { ...state, loading: false, events: updatedEvents };
+      return { ...state, events: updatedEvents };
+
     case UPDATE_EVENT_FAILURE:
-      return { ...state, loading: false, error: action.payload.error };
+      return { ...state, error: action.payload.error };
 
     case DELETE_EVENT_REQUEST:
-      return { ...state, loading: true, error: null };
+      return { ...state, error: null };
     case DELETE_EVENT_SUCCESS:
-      return { ...state, loading: false, events: action.payload.events };
+      return { ...state, events: action.payload.events };
     case DELETE_EVENT_FAILURE:
-      return { ...state, loading: false, error: action.payload.error };
+      return { ...state, error: action.payload.error };
     case CLEAR_EVENTS:
       return { ...state, events: [] };
     default:

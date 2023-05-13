@@ -17,59 +17,72 @@ import {
 const initialState = {
   eventsParticipants: [],
   loading: false,
+  event_id_loading: null,
   error: null,
 };
 
 const eventsParticipantsReducer = (state = initialState, action) => {
   switch (action.type) {
     case FETCH_EVENT_PARTICIPANTS_REQUEST:
-    case ADD_EVENT_PARTICIPANT_REQUEST:
-    case UPDATE_EVENT_PARTICIPANT_REQUEST:
-    case DELETE_EVENT_PARTICIPANT_REQUEST:
       return { ...state, loading: true, error: null };
-
     case FETCH_EVENT_PARTICIPANTS_SUCCESS:
       return {
         ...state,
         loading: false,
-        eventParticipants: action.payload.eventParticipants,
+        eventsParticipants: action.payload.eventsParticipants,
+      };
+    case FETCH_EVENT_PARTICIPANTS_FAILURE:
+      return { ...state, loading: false, error: action.payload.error };
+
+    case ADD_EVENT_PARTICIPANT_REQUEST:
+      return {
+        ...state,
+        error: null,
+        event_id_loading: action.payload.event_id,
       };
     case ADD_EVENT_PARTICIPANT_SUCCESS:
       return {
         ...state,
-        loading: false,
-        eventParticipants: [
+        eventsParticipants: [
           ...state.eventsParticipants,
           action.payload.eventParticipant,
         ],
+        event_id_loading: null,
       };
+    case ADD_EVENT_PARTICIPANT_FAILURE:
+      return { ...state, error: action.payload.error };
+
+    case UPDATE_EVENT_PARTICIPANT_REQUEST:
+      return { ...state, error: null };
     case UPDATE_EVENT_PARTICIPANT_SUCCESS:
       return {
         ...state,
-        loading: false,
-        eventParticipants: state.eventsParticipants.map((eventParticipant) =>
+        eventsParticipants: state.eventsParticipants.map((eventParticipant) =>
           eventParticipant.id === action.payload.eventParticipant.id
             ? action.payload.eventParticipant
             : eventParticipant
         ),
       };
+    case UPDATE_EVENT_PARTICIPANT_FAILURE:
+      return { ...state, error: action.payload.error };
+
+    case DELETE_EVENT_PARTICIPANT_REQUEST:
+      return { ...state, error: null, event_id_loading: action.payload.event_id };
     case DELETE_EVENT_PARTICIPANT_SUCCESS:
       return {
         ...state,
-        loading: false,
-        eventParticipants: state.eventsParticipants.filter(
-          (eventParticipant) => eventParticipant.id !== action.payload.id
+        eventsParticipants: state.eventsParticipants.filter(
+          (eventParticipant) =>
+            eventParticipant.event_id !== action.payload.event_id
         ),
+        event_id_loading: null,
       };
 
-    case FETCH_EVENT_PARTICIPANTS_FAILURE:
-    case ADD_EVENT_PARTICIPANT_FAILURE:
-    case UPDATE_EVENT_PARTICIPANT_FAILURE:
     case DELETE_EVENT_PARTICIPANT_FAILURE:
-      return { ...state, loading: false, error: action.payload.error };
+      return { ...state, error: action.payload.error, event_id_loading: null };
 
     case CLEAR_EVENT_PARTICIPANTS:
-      return { ...state, eventParticipants: [] };
+      return { ...state, eventsParticipants: [] };
 
     default:
       return state;
