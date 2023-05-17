@@ -1,5 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { View, StyleSheet, Text } from "react-native";
+import React, { useEffect, useState, useRef } from "react";
+import {
+  View,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  Animated,
+} from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import useData from "../hooks/useData";
 import { getMonthName, getDayOfMonth } from "../utils/dateUtils";
@@ -12,7 +18,12 @@ import {
   handleDeleteEventParticipant,
 } from "../redux/actions/eventsParticipants";
 
-export default function EventCard({ event, ...props }) {
+import BulletIcon from "../assets/images/chess_icons/bullet.png";
+import BlitzIcon from "../assets/images/chess_icons/blitz.png";
+import RapidIcon from "../assets/images/chess_icons/rapid.png";
+import { Image } from "react-native-web";
+
+export default function EventComponent({ event, ...props }) {
   const dispatch = useDispatch();
   const data = useData();
   const authState = useSelector((state) => state.authState);
@@ -21,6 +32,9 @@ export default function EventCard({ event, ...props }) {
   const [gameFormat, setGameFormat] = useState({});
   const [isUserRegistered, setIsUserRegistered] = useState(false);
 
+  const animatedHeight = useRef(new Animated.Value(80)).current;
+  const isExpanded = useRef(false);
+
   useEffect(() => {
     const game = data.games?.find((game) => game.id === event.game_id);
     const gameFormat = data.gameFormats.find(
@@ -28,6 +42,9 @@ export default function EventCard({ event, ...props }) {
     );
     setGame(game);
     setGameFormat(gameFormat);
+    if (game && gameFormat) {
+      console.log(game, gameFormat, event);
+    }
   }, [data.games, data.gameFormats, event.game_id, event.game_format_id]);
 
   useEffect(() => {
@@ -42,87 +59,140 @@ export default function EventCard({ event, ...props }) {
     }
   }, [authState, data.eventsParticipantsState]);
 
-  return (
-    <View style={styles.container} {...props}>
-      <FAB
-        style={[
-          styles.registerButton,
-          isUserRegistered ? styles.registeredColor : styles.notRegisteredColor,
-        ]}
-        animated={false}
-        icon={({ size, color }) =>
-          data.eventsParticipantsState.event_id_loading === event.id ? (
-            <Loading color={color} />
-          ) : (
-            <Icon
-              name={isUserRegistered ? "check" : "plus"}
-              size={size}
-              color="white"
-            />
-          )
+  const getGameIcon = () => {
+    switch (game?.type?.toLowerCase()) {
+      case "bullet":
+        return BulletIcon;
+      case "blitz":
+        return BlitzIcon;
+      case "rapid":
+        return RapidIcon;
+      default:
+        return BulletIcon;
+    }
+  };
+
+  const handleCardPress = () => {
+    if (isExpanded.current) {
+      Animated.timing(animatedHeight, {
+        toValue: 80,
+        duration: 300,
+        useNativeDriver: false,
+      }).start();
+    } else {
+      Animated.timing(animatedHeight, {
+        toValue: 180,
+        duration: 300,
+        useNativeDriver: false,
+      }).start();
+    }
+    isExpanded.current = !isExpanded.current;
+  };
+
+  const TimeContainer = () => (
+    <View>
+      <Text>
+        {game?.time_start_min}
+        {game?.increment_before_time_control_sec
+          ? `+ ${game?.increment_before_time_control_sec}`
+          : ""}
+      </Text>
+    </View>
+  );
+
+  const DateComponent = () => (
+    <View style={styles.gameDateContainer}>
+      <Text style={styles.gameDate}>{getDayOfMonth(event.date)}</Text>
+      <Text style={styles.gameDate}>{getMonthName(event.date)}</Text>
+    </View>
+  );
+
+  const EventCard = () => (
+    <TouchableOpacity onPress={handleCardPress} style={styles.flex1}>
+      <Animated.View
+        style={[styles.cardContainer, { height: animatedHeight }]}
+        {...props}
+      >
+        <View style={styles.contentContainer}>
+          <View style={styles.gameDetails}>
+            <View style={styles.gameInformation}>
+              <Text style={styles.eventName}>{event.name}</Text>
+              {isExpanded.current && <Text>{event.description}</Text>}
+              <TimeContainer />
+            </View>
+            <View style={styles.iconContainer}>
+              <Image source={getGameIcon()} style={styles.gameIcon} />
+            </View>
+          </View>
+        </View>
+      </Animated.View>
+    </TouchableOpacity>
+  );
+
+  const RegisterButton = () => (
+    <FAB
+      style={[
+        styles.registerButton,
+        isUserRegistered ? styles.registeredColor : styles.notRegisteredColor,
+      ]}
+      animated={false}
+      icon={({ size, color }) =>
+        data.eventsParticipantsState.event_id_loading === event.id ? (
+          <Loading color={color} />
+        ) : (
+          <Icon
+            name={isUserRegistered ? "check" : "plus"}
+            size={size}
+            color="white"
+          />
+        )
+      }
+      onPress={() => {
+        if (data.eventsParticipantsState.event_id_loading === event.id) return;
+        if (isUserRegistered) {
+          dispatch(handleDeleteEventParticipant(event.id, true));
+        } else {
+          dispatch(handleAddEventParticipant(event.id, true));
         }
-        onPress={() => {
-          if (isUserRegistered) {
-            dispatch(handleDeleteEventParticipant(event.id, true));
-          } else {
-            dispatch(handleAddEventParticipant(event.id, true));
-          }
-        }}
-      />
-      <View style={styles.contentContainer}>
-        <View style={styles.gameDateContainer}>
-          <Text style={styles.gameDate}>{getDayOfMonth(event.date)}</Text>
-          <Text style={styles.gameDate}>{getMonthName(event.date)}</Text>
-        </View>
-        <View style={styles.gameDetails}>
-          <Text>{event.name}</Text>
-          <Text>{event.description}</Text>
-          <Text>{event.name}</Text>
-        </View>
-        <View style={styles.gameIconContainer}>
-          <Text>{event.name}</Text>
-        </View>
-      </View>
+      }}
+    />
+  );
+
+  return (
+    <View style={styles.container}>
+      <DateComponent />
+      <EventCard />
+      <RegisterButton />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  flex1: {
+    flex: 1,
+  },
   container: {
     width: "100%",
-    height: 80,
-    position: "relative",
+    marginBottom: 10,
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-around",
+    gap: 20,
+  },
+  cardContainer: {
+    flex: 1,
     marginBottom: 10,
+    backgroundColor: "#fff",
+    borderRadius: 4,
   },
   contentContainer: {
-    flex: 1,
-    display: "flex",
     height: "100%",
+    display: "flex",
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-start",
+    alignItems: "center",
     padding: 10,
-    backgroundColor: "#fff",
-    borderRadius: 6,
-    marginHorizontal: 10,
-  },
-  registerButton: {
-    borderRadius: 50,
-    marginStart: 10,
-  },
-  registeredColor: {
-    backgroundColor: "#57e954",
-  },
-  notRegisteredColor: {
-    backgroundColor: "gray",
-  },
-  blackAndWhite: {
-    filter: "grayscale(100%)",
-    tintColor: "gray",
+    gap: 15,
   },
   gameDateContainer: {
     display: "flex",
@@ -130,28 +200,39 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  gameInformation: {
+    height: "100%",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-around",
+    alignItems: "center",
+  },
   gameDate: {
     fontSize: 24,
     color: "#000",
   },
   gameDetails: {
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  gameIconContainer: {
     height: "100%",
-    width: "auto",
     display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
+    flexDirection: "row",
     alignItems: "center",
   },
-  gameIcon: {
-    height: 40,
-    width: 40,
+  eventName: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  iconContainer: {},
+  gameIcon: {},
+  registerButton: {
+    position: "absolute",
+    bottom: 10,
+    right: 10,
+    borderRadius: 50,
+  },
+  registeredColor: {
+    backgroundColor: "#57e954",
+  },
+  notRegisteredColor: {
+    backgroundColor: "gray",
   },
 });
-
-// TODO: Proptypes
