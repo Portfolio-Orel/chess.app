@@ -67,7 +67,11 @@ const eventsParticipantsReducer = (state = initialState, action) => {
       return { ...state, error: action.payload.error };
 
     case DELETE_EVENT_PARTICIPANT_REQUEST:
-      return { ...state, error: null, event_id_loading: action.payload.event_id };
+      return {
+        ...state,
+        error: null,
+        event_id_loading: action.payload.event_id,
+      };
     case DELETE_EVENT_PARTICIPANT_SUCCESS:
       return {
         ...state,

@@ -8,6 +8,7 @@ import gameFormatsReducer from "./gameFormats";
 import intervalsReducer from "./intervals";
 import clubsReducer from "./clubs";
 import snacbbarReducer from "./snackbar";
+import bottomSheetReducer from "./bottomSheet";
 
 export default combineReducers({
   authState: authReducer,
@@ -17,5 +18,6 @@ export default combineReducers({
   gameFormatsState: gameFormatsReducer,
   intervalsState: intervalsReducer,
   snackbarState: snacbbarReducer,
+  bottomSheetState: bottomSheetReducer,
   clubsState: clubsReducer,
 });

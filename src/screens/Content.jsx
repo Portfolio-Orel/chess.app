@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, ScrollView } from "react-native";
+import { StyleSheet, ScrollView, View } from "react-native";
 import { ActivityIndicator } from "react-native-paper";
 
 import EventCard from "../components/EventCard";
@@ -28,7 +28,17 @@ export default function Content() {
   }, [data.events, data.loading]);
 
   return loading ? (
-    <ActivityIndicator size="large" color="#0000ff" />
+    <View
+      style={{
+        height: "100%",
+        width: "100%",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <ActivityIndicator size="large" color="#0000ff" />
+    </View>
   ) : (
     <ScrollView
       style={styles.scrollView}

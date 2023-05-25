@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 export default function () {
   const dispatch = useDispatch();
 
+  const authState = useSelector((state) => state.authState);
   const eventsState = useSelector((state) => state.eventsState);
   const gamesState = useSelector((state) => state.gamesState);
   const gameFormatsState = useSelector((state) => state.gameFormatsState);
@@ -110,6 +111,36 @@ export default function () {
       setError(clubsState.error);
     }
   }, [clubsState]);
+
+  // Go over all events and set isUserRegistered to true if user is registered to that event
+  useEffect(() => {
+    if (
+      authState.user &&
+      eventsParticipantsState.eventsParticipants &&
+      eventsParticipantsState.event_id_loading === null
+    ) {
+      let eventsParticipants = eventsParticipantsState.eventsParticipants;
+      let currentEvents = eventsState.events;
+      let user = authState.user;
+      currentEvents?.forEach((event) => (event.isUserRegistered = false));
+      eventsParticipants.forEach((eventParticipant) => {
+        currentEvents.forEach((event) => {
+          if (eventParticipant.event_id === event.id) {
+            if (eventParticipant.user_id === user.id) {
+              event.isUserRegistered = true;
+            } else {
+              event.isUserRegistered = false;
+            }
+          }
+        });
+      });
+      setEvents(currentEvents);
+    }
+  }, [
+    authState.user,
+    eventsParticipantsState.eventsParticipants,
+    eventsState.events,
+  ]);
 
   return {
     fetch,
